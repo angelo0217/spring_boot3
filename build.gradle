@@ -29,8 +29,8 @@ ext {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation('org.springframework.boot:spring-boot-starter-websocket')
-	implementation('org.springframework.boot:spring-boot-starter-actuator')
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 //	Redis
 	implementation "org.springframework.boot:spring-boot-starter-data-redis"
 	implementation 'org.apache.commons:commons-pool2'
@@ -38,14 +38,15 @@ dependencies {
 //	lombok
 	compileOnly 'org.projectlombok:lombok:1.18.28'
 	annotationProcessor 'org.projectlombok:lombok:1.18.28'
-	testCompileOnly('org.projectlombok:lombok:1.18.28')
-	testAnnotationProcessor('org.projectlombok:lombok:1.18.28')
+	testCompileOnly 'org.projectlombok:lombok:1.18.28'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.28'
 
 	//    Spring cloud
 	implementation('org.springframework.cloud:spring-cloud-starter-bootstrap')
 	implementation('org.springframework.cloud:spring-cloud-starter-consul-discovery')
 	implementation('org.springframework.cloud:spring-cloud-starter-openfeign')
-
+	implementation("org.springframework.cloud:spring-cloud-stream")
+	implementation('org.springframework.cloud:spring-cloud-starter-stream-rabbit')
 	testImplementation 'junit:junit:4.13.1'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

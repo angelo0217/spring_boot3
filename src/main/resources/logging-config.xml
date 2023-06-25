@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <conversionRule conversionWord="ip" converterClass="com.demo.service.config.IPLogConfig" />
+    <property name="CHARSET" value="UTF-8" />
+    <property name="PATTERN" value="%d{yyyy-MMM-dd HH:mm:ss}[%level][%thread] %logger{0} - %msg%n" />
+    <property name="PATTERN_FRONT" value="%msg%n" />
+    <property name="HOME_LOG" value="/opt/logs/demo_client/demo-client.log"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoder默認配置為PartternLayoutEncoder    -->
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${PATTERN}</pattern>
+            <charset>${CHARSET}</charset>
+        </encoder>
+    </appender>
+
+<!--    <appender name="KAFKA" class="com.github.danielwegener.logback.kafka.KafkaAppender">-->
+<!--        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">-->
+<!--            <pattern>%d{yyyy-MM-dd HH:mm:ss}[%ip][%t] %-5level [%c{0}] %m%n</pattern>-->
+<!--        </encoder>-->
+
+<!--        <topic>demo-client</topic>-->
+<!--        <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.NoKeyKeyingStrategy" />-->
+<!--        <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />-->
+
+<!--        <producerConfig>bootstrap.servers=demo-kafka:9092</producerConfig>-->
+<!--        <producerConfig>acks=0</producerConfig>-->
+<!--        <producerConfig>linger.ms=100</producerConfig>-->
+<!--        <producerConfig>max.block.ms=100</producerConfig>-->
+<!--        <producerConfig>max.block.ms=0</producerConfig>-->
+<!--        <producerConfig>client.id=${HOSTNAME}-${CONTEXT_NAME}-logback-relaxed</producerConfig>-->
+
+<!--    </appender>-->
+
+    <appender name="DEMO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${HOME_LOG}</file>
+        <encoder>
+            <pattern>${PATTERN}</pattern>
+            <charset>${CHARSET}</charset>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${HOME_LOG}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each archived file, size max 10MB -->
+            <maxFileSize>100MB</maxFileSize>
+            <!-- total size of all archive files, if total size > 20GB, it will delete old archived file -->
+            <totalSizeCap>10GB</totalSizeCap>
+            <!-- 60 days to keep -->
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <logger name="com.example.demo" level="DEBUG" additivity="false">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="DEMO_FILE"/>
+<!--        <appender-ref ref="KAFKA"/>-->
+    </logger>
+
+    <logger name="org.springframework" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="DEMO_FILE"/>
+<!--        <appender-ref ref="KAFKA"/>-->
+    </logger>
+
+    <root level="INFO" additivity="false">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="DEMO_FILE"/>
+    </root>
+</configuration>

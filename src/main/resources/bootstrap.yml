@@ -1,0 +1,90 @@
+logging:
+  config: classpath:logging-config.xml
+prj:
+  consul:
+    name: demo-client
+server:
+  port: 10000
+  servlet:
+    context-path: /demo
+spring:
+  application:
+    name: springboot3_demo
+  cloud:
+    consul:
+      discovery:
+        health-check-path: ${server.servlet.context-path}/actuator/health
+        health-check-timeout: 15s
+        instance-id: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
+        prefer-ip-address: true
+        service-name: ${prj.consul.name}
+        tags: metrics=true
+      host: 127.0.0.1
+      port: 8500
+    inetutils:
+      ignored-interfaces:
+        - docker0
+        - veth.*
+        - eth1
+        - eth2
+        - eth3
+        - eth4
+      preferred-networks:
+        - 192.0
+        - 10.0
+    function:
+      # ???? ? binding ???????????????
+      definition: msg;test;
+    stream:
+      binders:
+        local_rabbit:
+          type: rabbit
+          environment:
+            spring:
+              rabbitmq:
+                host: 127.0.0.1
+                port: 5672
+                username: guest
+                password: guest
+      bindings:
+        demo-out-0:
+          content-type: application/json
+          destination: stream-test-demo
+          group: test-group
+          binder: local_rabbit
+        msg-in-0:
+          content-type: application/json
+          destination: stream-test-demo
+          group: test-group
+          binder: local_rabbit
+        demo2-out-1:
+          content-type: application/json
+          destination: stream-msg2-test
+          group: test-msg2
+          binder: local_rabbit
+        test-in-1:
+          content-type: application/json
+          destination: stream-msg2-test
+          group: test-msg2
+          binder: local_rabbit
+      rabbit:
+        bindings:
+          msg-in-0:
+            consumer:
+              expires: 3600000
+              ttl: 500
+              auto-bind-dlq: true
+              dlq-ttl: 500
+              dlq-dead-letter-exchange:
+  data:
+    redis:
+      database: 0
+      host: 127.0.0.1
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          max-wait: -1
+          min-idle: 0
+      port: 6379
+      timeout: 5000

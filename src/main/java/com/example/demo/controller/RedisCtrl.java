@@ -3,7 +3,6 @@ package com.example.demo.controller;
 import com.example.demo.entity.User;
 import com.example.demo.service.CacheSample;
 import com.example.demo.utils.JsonUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -18,11 +17,11 @@ import java.util.Date;
 
 @RestController
 @RequestMapping("/rds")
-public class Redis {
+public class RedisCtrl {
     private RedisTemplate redisTemplate;
     private CacheSample cacheSample;
 
-    public Redis(RedisTemplate redisTemplate, CacheSample cacheSample){
+    public RedisCtrl(RedisTemplate redisTemplate, CacheSample cacheSample){
         this.redisTemplate = redisTemplate;
         this.cacheSample = cacheSample;
     }
