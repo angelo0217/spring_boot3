@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import com.example.demo.utils.JacksonSerializerUtil;
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +23,7 @@ public class RedisConfig implements CachingConfigurer {
         RedisTemplate<String, V> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-//        redisTemplate.setValueSerializer(JacksonSerializerUtil.jackson2JsonRedisSerializer());
+        redisTemplate.setValueSerializer(JacksonSerializerUtil.jackson2JsonRedisSerializer());
         redisTemplate.afterPropertiesSet();
         return redisTemplate;
     }
