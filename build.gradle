@@ -31,6 +31,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+//	DB
+	implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+	implementation 'mysql:mysql-connector-java:8.0.33'
+	implementation 'org.liquibase:liquibase-core'
 //	Redis
 	implementation "org.springframework.boot:spring-boot-starter-data-redis"
 	implementation 'org.apache.commons:commons-pool2'
@@ -47,7 +52,7 @@ dependencies {
 	implementation('org.springframework.cloud:spring-cloud-starter-openfeign')
 	implementation("org.springframework.cloud:spring-cloud-stream")
 	implementation('org.springframework.cloud:spring-cloud-starter-stream-rabbit')
-	testImplementation 'junit:junit:4.13.1'
+	testImplementation 'junit:junit:4.13.2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
