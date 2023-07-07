@@ -11,77 +11,16 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-public class BookService {
+public class BookService extends BaseService<BookDTO, Book, Integer> {
     private final BookRepository bookRepository;
 
     public BookService(BookRepository bookRepository) {
+        super(bookRepository);
         this.bookRepository = bookRepository;
     }
 
-    public BookDTO createBook(BookDTO bookDTO) {
-        Book book = new Book();
-        book.setTitle(bookDTO.getTitle());
-        book.setAuthor(bookDTO.getAuthor());
-        book.setPublicationDate(bookDTO.getPublicationDate());
-        book.setIsbn(bookDTO.getIsbn());
-        book.setGenre(bookDTO.getGenre());
-        book.setPrice(bookDTO.getPrice());
-        book.setQuantity(bookDTO.getQuantity());
-        Book savedBook = bookRepository.save(book);
-
-        // Map the saved book entity back to DTO and return
-        return BookDTO.mapBookToDTO(savedBook);
-    }
-
-    public BookDTO getBookById(int bookId) {
-        Optional<Book> optionalBook = bookRepository.findById(bookId);
-        if (optionalBook.isPresent()) {
-            Book book = optionalBook.get();
-            return BookDTO.mapBookToDTO(book);
-        }
-        return null; // Book not found
-    }
-
-    public List<BookDTO> getAllBooks() {
-        List<Book> books = bookRepository.findAll();
-        return books.stream()
-                .map(BookDTO::mapBookToDTO)
-                .collect(Collectors.toList());
-    }
-
-    public BookDTO updateBook(BookDTO bookDTO) {
-        Optional<Book> optionalBook = bookRepository.findById(bookDTO.getBookId());
-        if (optionalBook.isPresent()) {
-            Book book = optionalBook.get();
-            book.setTitle(bookDTO.getTitle());
-            book.setAuthor(bookDTO.getAuthor());
-            book.setPublicationDate(bookDTO.getPublicationDate());
-            book.setIsbn(bookDTO.getIsbn());
-            book.setGenre(bookDTO.getGenre());
-            book.setPrice(bookDTO.getPrice());
-            book.setQuantity(bookDTO.getQuantity());
-
-            Book updatedBook = bookRepository.save(book);
-
-            // Map the updated book entity back to DTO and return
-            return BookDTO.mapBookToDTO(updatedBook);
-        }
-        return null; // Book not found
-    }
-
-    public boolean deleteBook(int bookId) {
-        Optional<Book> optionalBook = bookRepository.findById(bookId);
-        if (optionalBook.isPresent()) {
-            Book book = optionalBook.get();
-            bookRepository.delete(book);
-            return true;
-        }
-        return false; // Book not found
-    }
 
     public List<BookWithBorrowingRecordDTO> getBooksWithBorrowingRecords() {
         List<Object[]> results = bookRepository.findBooksWithBorrowingRecords();
@@ -91,8 +30,8 @@ public class BookService {
             Book book = (Book) result[0];
             BorrowingRecord borrowingRecord = (BorrowingRecord) result[1];
 
-            BookDTO bookDTO = BookDTO.mapBookToDTO(book);
-            BorrowingRecordDTO borrowingRecordDTO = BorrowingRecordDTO.mapBorrowingRecordToDTO(borrowingRecord);
+            BookDTO bookDTO = mapBookToDTO(book);
+            BorrowingRecordDTO borrowingRecordDTO = mapBorrowingRecordToDTO(borrowingRecord);
 
             BookWithBorrowingRecordDTO bookWithBorrowingRecordDTO = new BookWithBorrowingRecordDTO();
             bookWithBorrowingRecordDTO.setBook(bookDTO);
@@ -137,5 +76,65 @@ public class BookService {
                 .borrowerName((String) result.get("borrower_name"))
                 .build();
         return borrowingRecordDTO;
+    }
+
+    public static BookDTO mapBookToDTO(Book book) {
+        BookDTO bookDTO = BookDTO.builder()
+                .bookId(book.getBookId())
+                .title(book.getTitle())
+                .author(book.getAuthor())
+                .publicationDate(book.getPublicationDate())
+                .isbn(book.getIsbn())
+                .genre(book.getGenre())
+                .price(book.getPrice())
+                .quantity(book.getQuantity())
+                .build();
+
+        return bookDTO;
+    }
+    public static BorrowingRecordDTO mapBorrowingRecordToDTO(BorrowingRecord borrowingRecord) {
+        BorrowingRecordDTO borrowingRecordDTO = BorrowingRecordDTO.builder()
+                .recordId(borrowingRecord.getRecordId())
+                .bookId(borrowingRecord.getBookId())
+                .borrowerName(borrowingRecord.getBorrowerName())
+                .borrowDate(borrowingRecord.getBorrowDate())
+                .returnDate(borrowingRecord.getReturnDate())
+                .status(borrowingRecord.getStatus())
+                .build();
+        return borrowingRecordDTO;
+    }
+
+    @Override
+    protected Book convertToEntity(BookDTO bookDTO) {
+        Book book = new Book();
+        book.setBookId(bookDTO.getBookId());
+        book.setTitle(bookDTO.getTitle());
+        book.setAuthor(bookDTO.getAuthor());
+        book.setPublicationDate(bookDTO.getPublicationDate());
+        book.setIsbn(bookDTO.getIsbn());
+        book.setGenre(bookDTO.getGenre());
+        book.setPrice(bookDTO.getPrice());
+        book.setQuantity(bookDTO.getQuantity());
+        return book;
+    }
+
+    @Override
+    protected BookDTO convertToDto(Book book) {
+        var bookDTO = BookDTO.builder()
+                .bookId(book.getBookId())
+                .title(book.getTitle())
+                .author(book.getAuthor())
+                .publicationDate(book.getPublicationDate())
+                .isbn(book.getIsbn())
+                .genre(book.getGenre())
+                .price(book.getPrice())
+                .quantity(book.getQuantity())
+                .build();
+        return bookDTO;
+    }
+
+    @Override
+    protected Integer getDtoId(BookDTO bookDTO) {
+        return bookDTO.getBookId();
     }
 }

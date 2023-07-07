@@ -36,7 +36,7 @@ public class TestBookDb {
                 .quantity(10)
                 .build();
 
-        bookDTO = bookService.createBook(bookDTO);
+        bookDTO = bookService.create(bookDTO);
         System.out.println(".............." + bookDTO.getBookId());
     }
 
@@ -51,7 +51,7 @@ public class TestBookDb {
                 .status("Borrowed")
                 .build();
 
-        borrowingRecordDTO = borrowingRecordService.createBorrowingRecord(borrowingRecordDTO);
+        borrowingRecordDTO = borrowingRecordService.create(borrowingRecordDTO);
         System.out.println(".............." + borrowingRecordDTO.getRecordId());
     }
 
@@ -66,7 +66,7 @@ public class TestBookDb {
 
     @Test
     public void queryAllBooks(){
-        List<BookDTO> data = bookService.getAllBooks();
+        List<BookDTO> data = bookService.getAll();
         data.stream().forEach(d -> {
             System.out.println(d.getBookId());
         });

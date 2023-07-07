@@ -54,6 +54,13 @@ dependencies {
 	implementation('org.springframework.cloud:spring-cloud-starter-stream-rabbit')
 	testImplementation 'junit:junit:4.13.2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	//swagger ui
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-common:2.1.0'
+
+
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 }
 
 tasks.named('test') {

@@ -3,10 +3,24 @@ logging:
 prj:
   consul:
     name: demo-client
+api:
+  response-codes:
+    notFound:
+      desc: 404
+    badRequest:
+      desc: 400
+    ok:
+      desc: ok
 server:
   port: 10000
   servlet:
     context-path: /demo
+springdoc:
+  api-docs:
+    path: /v2/api-docs
+  swagger-ui:
+    path: /test
+#http://127.0.0.1:10000/demo/test redirect to http://127.0.0.1:10000/demo/swagger-ui/index.html
 spring:
   application:
     name: springboot3_demo
