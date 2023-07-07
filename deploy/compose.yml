@@ -1,0 +1,45 @@
+version: "3.7"
+services:
+  qsfmq:
+    image: rabbitmq:3.11.7-management
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+  qsf-consul:
+    image: consul:1.15.2
+    hostname: qsf-consul
+    restart: always
+    ports:
+      - '8300:8300'
+      - '8301:8301'
+      - '8301:8301/udp'
+      - '8500:8500'
+      - '8600:8600'
+      - '8600:8600/udp'
+    command: [ "agent", "-data-dir=/tmp/consul", "-server", "-ui", "-bootstrap", "-datacenter=dc1", "-client=0.0.0.0", "-bind={{ GetInterfaceIP \"eth0\" }}", "-node=server1"]
+    networks:
+      - byfn
+  qsf-redis:
+    image: "redis:7.0-alpine"
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - byfn
+  mysql:
+    image: mysql:8.0.25
+    container_name: mysql
+    command: mysqld --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - '3306:3306'
+    environment:
+      #      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: Java1234!
+      MYSQL_DATABASE: mydb
+    networks:
+      - byfn
+networks:
+  byfn:
+    name: byfn
+    driver: overlay
