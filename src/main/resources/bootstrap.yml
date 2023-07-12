@@ -12,7 +12,7 @@ api:
     ok:
       desc: ok
 server:
-  port: 10000
+  port: 9999
   servlet:
     context-path: /demo
 springdoc:
@@ -20,7 +20,7 @@ springdoc:
     path: /v2/api-docs
   swagger-ui:
     path: /test
-#http://127.0.0.1:10000/demo/test redirect to http://127.0.0.1:10000/demo/swagger-ui/index.html
+#http://127.0.0.1:9999/demo/test redirect to http://127.0.0.1:9999/demo/swagger-ui/index.html
 spring:
   application:
     name: springboot3_demo

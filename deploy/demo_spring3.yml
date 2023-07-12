@@ -15,7 +15,7 @@ services:
     environment:
       JAVA_OPTS: "-Xmx3200M -Xms1024M"
     ports:
-      - '10000:10000'
+      - '10000:9999'
     networks:
       - byfn
     volumes:
