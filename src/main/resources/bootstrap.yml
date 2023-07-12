@@ -33,7 +33,7 @@ spring:
         prefer-ip-address: true
         service-name: ${prj.consul.name}
         tags: metrics=true
-      host: 127.0.0.1
+      host: demo-consul
       port: 8500
     inetutils:
       ignored-interfaces:
@@ -55,8 +55,8 @@ spring:
           environment:
             spring:
               rabbitmq:
-                host: 127.0.0.1
-                port: 5673
+                host: demo-mq
+                port: 5672
                 username: guest
                 password: guest
       bindings:
@@ -92,7 +92,7 @@ spring:
   data:
     redis:
       database: 0
-      host: 127.0.0.1
+      host: demo-redis
       lettuce:
         pool:
           max-active: 8
@@ -102,7 +102,7 @@ spring:
       port: 6379
       timeout: 5000
   datasource:
-    url: jdbc:mysql://localhost:3306/mydb?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://demo-mysql:3306/mydb?useUnicode=true&characterEncoding=utf-8&useSSL=false
     username: root
     password: Java1234!
     driver-class-name: com.mysql.jdbc.Driver
