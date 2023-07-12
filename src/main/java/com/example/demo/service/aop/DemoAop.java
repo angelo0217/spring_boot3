@@ -37,7 +37,6 @@ public class DemoAop {
         returning = "result"
     )
     public void afterController(JoinPoint joinPoint, Object result) {
-        log.info("***aop after*** request mapping ");
         log.info("***aop after*** request result :{} ", JsonUtil.objectToJson(result));
         Object[] objs = joinPoint.getArgs();
         for (Object obj : objs) {
