@@ -17,7 +17,7 @@ ENV SERVICE_NAME="spring_boot3"
 
 COPY --from=cache /home/gradle/cache_home /home/gradle/.gradle
 
-COPY ../${SERVICE_NAME} /workspace/${SERVICE_NAME}/
+COPY ../../${SERVICE_NAME} /workspace/${SERVICE_NAME}/
 WORKDIR /workspace/${SERVICE_NAME}
 
 RUN gradle bootJar -i --stacktrace -x test --no-daemon
