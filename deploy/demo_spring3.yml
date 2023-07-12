@@ -1,0 +1,29 @@
+version: "3.7"
+services:
+  deom-sprinn3:
+    image: demo-spring:0.0.1
+    deploy:
+      replicas: 6
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: "2"
+          memory: "2048M"
+    environment:
+      JAVA_OPTS: "-Xmx3200M -Xms1024M"
+    ports:
+      - '10000:10000'
+    networks:
+      - byfn
+    volumes:
+      - deom_sprinn3:/opt/logs/demo_client/
+volumes:
+  deom_sprinn3:
+    name: deom_sprinn3
+networks:
+  byfn:
+    external:
+      name: byfn
