@@ -10,6 +10,7 @@ WORKDIR /workspace/${SERVICE_NAME}/
 COPY ../build.gradle /workspace/${SERVICE_NAME}/
 
 RUN gradle dependencies
+
 FROM gradle:7.6-jdk17 as build
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -17,7 +18,7 @@ ENV SERVICE_NAME="spring_boot3"
 
 COPY --from=cache /home/gradle/cache_home /home/gradle/.gradle
 
-COPY ../../${SERVICE_NAME} /workspace/${SERVICE_NAME}/
+COPY ../ /workspace/${SERVICE_NAME}/
 WORKDIR /workspace/${SERVICE_NAME}
 
 RUN gradle bootJar -i --stacktrace -x test --no-daemon
