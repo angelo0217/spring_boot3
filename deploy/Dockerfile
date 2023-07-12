@@ -7,7 +7,7 @@ ENV GRADLE_USER_HOME /home/gradle/cache_home
 
 WORKDIR /workspace/${SERVICE_NAME}/
 
-COPY build.gradle /workspace/${SERVICE_NAME}/
+COPY ../build.gradle /workspace/${SERVICE_NAME}/
 
 RUN gradle dependencies
 FROM gradle:7.6-jdk17 as build
