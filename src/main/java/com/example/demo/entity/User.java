@@ -21,16 +21,4 @@ public class User implements Serializable {
     private BigDecimal number;
     private long long_num;
 
-//    @JsonCreator
-//    public User(@JsonProperty("name")String name,
-//                @JsonProperty("age")int age,
-//                @JsonProperty("create_date")Date create_date,
-//                @JsonProperty("number")BigDecimal number,
-//                @JsonProperty("long_num")long long_num) {
-//        this.name = name;
-//        this.age = age;
-//        this.create_date =create_date;
-//        this.number = number;
-//        this.long_num = long_num;
-//    }
 }

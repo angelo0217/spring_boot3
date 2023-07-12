@@ -3,10 +3,18 @@ package com.example.demo.utils;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Slf4j
 public final class JsonUtil {
@@ -21,6 +29,8 @@ public final class JsonUtil {
         simpleModule.addSerializer(BigDecimal.class, new BigDecimalSerialize());
 
         jsonToObjMapper.registerModule(simpleModule);
+        registerDateFormat(jsonToObjMapper);
+        registerDateFormat(mapper);
     }
 
 
@@ -50,4 +60,22 @@ public final class JsonUtil {
         }
     }
 
+
+    public static void registerDateFormat(ObjectMapper objectMapper){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        objectMapper.setDateFormat(dateFormat);
+
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDateSerializer localDateSerializer = new LocalDateSerializer(dateFormatter);
+        objectMapper.registerModule(new JavaTimeModule()
+                .addSerializer(LocalDate.class, localDateSerializer));
+
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTimeSerializer localDateTimeSerializer = new LocalDateTimeSerializer(dateTimeFormatter);
+        objectMapper.registerModule(new JavaTimeModule()
+                .addSerializer(LocalDateTime.class, localDateTimeSerializer));
+    }
 }
