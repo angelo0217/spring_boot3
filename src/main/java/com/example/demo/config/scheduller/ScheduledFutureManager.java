@@ -1,4 +1,4 @@
-package com.example.demo.config;
+package com.example.demo.config.scheduller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,43 +20,55 @@ public class ScheduledFutureManager {
     private ScheduledExecutorService scheduledExecutorService;
     private ThreadPoolTaskScheduler taskScheduler;
 
-    public ScheduledFutureManager(@Qualifier("TestScheduled") ScheduledExecutorService scheduledExecutorService,
-                                  @Qualifier("cronSchedulerThread") ThreadPoolTaskScheduler taskScheduler){
+    public ScheduledFutureManager(
+        @Qualifier("TestScheduled") ScheduledExecutorService scheduledExecutorService,
+        @Qualifier("cronSchedulerThread") ThreadPoolTaskScheduler taskScheduler
+    ) {
         this.scheduledExecutorService = scheduledExecutorService;
         this.taskScheduler = taskScheduler;
     }
 
 
-    public void addCronJob(String key, Runnable task, String cronExpression){
+    public void addCronJob(String key, Runnable task, String cronExpression) {
         this.remove(key);
-        stringScheduledFutureMap.put(key, taskScheduler.schedule(task, new CronTrigger(cronExpression)));
+        stringScheduledFutureMap.put(
+            key, taskScheduler.schedule(task, new CronTrigger(cronExpression))
+        );
     }
 
-    public void addTestFuture(String key, Runnable task, int delay){
+    public void addTestFuture(String key, Runnable task, int delay) {
         this.remove(key);
         log.info("[ScheduledFutureManager](addTestFuture) key: {}", key);
         // 延迟 1 秒后执行任务
-        stringScheduledFutureMap.put(key, scheduledExecutorService.schedule(task, delay, TimeUnit.SECONDS));
+        stringScheduledFutureMap.put(
+            key,
+            scheduledExecutorService.schedule(task, delay, TimeUnit.SECONDS)
+        );
     }
 
 
-    public void addTestFix(String key, Runnable task, int initialDelay, int period){
+    public void addTestFix(String key, Runnable task, int initialDelay, int period) {
         this.remove(key);
         log.info("[ScheduledFutureManager](addTestFix) key: {}", key);
         // 延迟0 秒后开始执行任务，然后每 5 秒重复执行一次, initialDelay = 0, period = 5
-        stringScheduledFutureMap.put(key, scheduledExecutorService.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.SECONDS));
+        stringScheduledFutureMap.put(
+            key,
+            scheduledExecutorService.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.SECONDS)
+        );
     }
 
-    public void addTestFixDelay(String key, Runnable task, int initialDelay, int period){
+    public void addTestFixDelay(String key, Runnable task, int initialDelay, int period) {
         this.remove(key);
         log.info("[ScheduledFutureManager](addTestFixDelay) key: {}", key);
         // 延迟 0 秒后开始执行任务，然后等待上一次任务执行完成后再延迟 5 秒重复执行一次, initialDelay = 0, period = 5
-        stringScheduledFutureMap.put(key, scheduledExecutorService.scheduleWithFixedDelay(task, initialDelay, period, TimeUnit.SECONDS));
+        stringScheduledFutureMap.put(
+            key, scheduledExecutorService.scheduleWithFixedDelay(task, initialDelay, period, TimeUnit.SECONDS)
+        );
     }
 
-    public void remove(String key){
+    public void remove(String key) {
         ScheduledFuture scheduledFuture = stringScheduledFutureMap.get(key);
-        if(scheduledFuture != null){
+        if (scheduledFuture != null) {
             log.debug("[ScheduledFutureManager](remove), name {}, key: {}", this.getClass().getSimpleName(), key);
             scheduledFuture.cancel(true);
             stringScheduledFutureMap.remove(key);

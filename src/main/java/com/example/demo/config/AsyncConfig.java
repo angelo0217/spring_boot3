@@ -9,33 +9,14 @@ import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Slf4j
 @Configuration
 @EnableAsync
 public class AsyncConfig implements AsyncConfigurer {
-    private static final ThreadGroup TEST_GROUP = new ThreadGroup("TestGroup");
-
-    @Bean("TestScheduled")
-    public ScheduledExecutorService timeOutScheduled() {
-        return Executors.newScheduledThreadPool(10000, new ScheduleThreadFactory("test-scheduled", TEST_GROUP));
-    }
-
-
-    @Bean("cronSchedulerThread")
-    public ThreadPoolTaskScheduler cronSchedulerThread(){
-        var taskScheduler = new ThreadPoolTaskScheduler();
-        taskScheduler.setPoolSize(5);
-        taskScheduler.initialize();
-        return taskScheduler;
-    }
-
     @Bean(name = "threadPoolTaskExecutor")
     public Executor threadPoolTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

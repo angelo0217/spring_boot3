@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.config.ScheduledFutureManager;
+import com.example.demo.config.scheduller.ScheduledFutureManager;
 import com.example.demo.service.task.TestTask;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.BeanFactory;
