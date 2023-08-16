@@ -7,6 +7,7 @@ spec:
   selector:
     matchLabels:
       app: demo-mysql
+      namespace: java-k8s
   template:
     metadata:
       labels:
