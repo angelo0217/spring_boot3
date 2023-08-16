@@ -37,17 +37,21 @@ spec:
   selector:
     app: demo-consul
   ports:
-    - protocol: TCP
+    - name: consul-8300
+      protocol: TCP
       port: 8300
       targetPort: 8300
-    - protocol: TCP
+    - name: consul-8301
+      protocol: TCP
       port: 8301
       targetPort: 8301
-    - protocol: TCP
+    - name: consul-8500
+      protocol: TCP
       port: 8500
       targetPort: 8500
       nodePort: 32001
-    - protocol: UDP
+    - name: consul-8600
+      protocol: UDP
       port: 8600
       targetPort: 8600
   type: NodePort
