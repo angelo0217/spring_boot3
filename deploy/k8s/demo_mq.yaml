@@ -34,3 +34,4 @@ spec:
       port: 15672
       targetPort: 15672
       nodePort: 32002
+  type: NodePort
