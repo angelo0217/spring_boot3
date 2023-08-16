@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-consul
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-consul
+  template:
+    metadata:
+      labels:
+        app: demo-consul
+    spec:
+      containers:
+        - name: demo-consul
+          image: consul:1.15.2
+          ports:
+            - containerPort: 8300
+            - containerPort: 8301
+            - containerPort: 8500
+            - containerPort: 8600
+          command: ["agent", "-data-dir=/tmp/consul", "-server", "-ui", "-bootstrap", "-datacenter=dc1", "-client=0.0.0.0", "-bind=$(POD_IP)", "-node=server1"]
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-consul
+spec:
+  selector:
+    app: demo-consul
+  ports:
+    - protocol: TCP
+      port: 8300
+      targetPort: 8300
+    - protocol: TCP
+      port: 8301
+      targetPort: 8301
+    - protocol: TCP
+      port: 8500
+      targetPort: 8500
+      nodePort: 32001
+    - protocol: UDP
+      port: 8600
+      targetPort: 8600
+

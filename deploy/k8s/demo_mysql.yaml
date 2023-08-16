@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-mysql
+  template:
+    metadata:
+      labels:
+        app: demo-mysql
+    spec:
+      containers:
+        - name: demo-mysql
+          image: mysql:8.0.25
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: Java1234!
+            - name: MYSQL_DATABASE
+              value: mydb
+          command: ["mysqld", "--default-authentication-plugin=mysql_native_password", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-mysql
+spec:
+  selector:
+    app: demo-mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+      nodePort: 32003

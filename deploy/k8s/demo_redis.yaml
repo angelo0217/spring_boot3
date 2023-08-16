@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-redis
+  template:
+    metadata:
+      labels:
+        app: demo-redis
+    spec:
+      containers:
+        - name: demo-redis
+          image: "redis:7.0-alpine"
+          ports:
+            - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-redis
+spec:
+  selector:
+    app: demo-redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+      nodePort: 32004
