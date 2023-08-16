@@ -2,12 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: demo-mq
+  namespace: java-k8s
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: demo-mq
-      namespace: java-k8s
   template:
     metadata:
       labels:
@@ -24,6 +24,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: demo-mq
+  namespace: java-k8s
 spec:
   selector:
     app: demo-mq

@@ -1,13 +1,112 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-cnf
+  namespace: java-k8s
+data:
+  my.cnf: |
+    # For advice on how to change settings please see
+    # https://dev.mysql.com/doc/refman/8.0/en/server-configuration-defaults.html
+
+    [mysqld]
+    server-id = 1
+
+    datadir=/var/lib/mysql
+    basedir=/usr
+    socket=/var/run/mysqld/mysqld.sock
+    log-error = /var/lib/mysql/error.log
+    pid-file = /var/lib/mysql/mysqld.pid
+
+    default_time_zone = "+8:00"
+
+    # MySQL允許最大的程序連線數，如果經常出現Too Many Connections的錯誤提示，則需要增大此值。預設151
+    max_connections = 4000  
+
+    # 設定每個主機的連線請求異常中斷的最大次數，當超過該次數，MYSQL伺服器將禁止host的連線請求，直到mysql伺服器重啟或通過flush hosts命令清空此host的相關資訊。預設100
+    max_connect_errors = 8000 
+
+    # 在MYSQL暫時停止響應新請求之前，短時間內的多少個請求可以被存在堆疊中。如果系統在短時間內有很多連線，則需要增大該引數的值，該引數值指定到來的TCP/IP連線的監聽佇列的大小。預設值80。
+    # 官方建議 back_log = 50 + (max_connections / 5), 封頂數為65535, 默認值= max_connections
+    back_log = 850
+
+    # 所有線程的開放表的數量
+    # 例如，對於max_connections個同時運行的連接，指定一個至少為max_connections*N的表查看大小。N是你執行的任何查詢中每個連接的最大表數
+    # 目前設置跟max_connections相同數量
+    table_open_cache = 4000
+
+    # The number of table definitions that can be stored in the definition cache 
+    # MIN(400 + table_open_cache / 2, 2000)
+    table_definition_cache = 2400
+
+    # 為了減少會話之間的爭用，可以將opentables劃分為table_open_cache/table_open_cache_instances個小緩存
+    table_open_cache_instances = 64
+
+    #單個線程的場景大小如果實例太小，則限制執行複雜的SQL語句
+    thread_stack = 512K
+
+    # 使用–skip-external-locking MySQL選項以避免外部鎖定。該選項預設開啟
+    external-locking = FALSE  
+
+    # 設定在網路傳輸中一次訊息傳輸量的最大值。系統預設值 為4MB，最大值是1GB，必須設定1024的倍數。
+    max_allowed_packet = 32M  
+
+    # Sort_Buffer_Size 是一個connection級引數，在每個connection（session）第一次需要使用這個buffer的時候，一次性分配設定的記憶體。
+    # Sort_Buffer_Size 並不是越大越好，由於是connection級的引數，過大的設定+高併發可能會耗盡系統記憶體資源。例如：500個連線將會消耗 500*sort_buffer_size(8M)=4G記憶體
+    # Sort_Buffer_Size 超過2KB的時候，就會使用mmap() 而不是 malloc() 來進行記憶體分配，導致效率降低。 系統預設2M。
+    sort_buffer_size = 4M
+
+    # 用於表間關聯快取的大小，和sort_buffer_size一樣，該引數對應的分配記憶體也是每個連線獨享。系統預設2M。
+    join_buffer_size = 2M  
+
+    # 如果您的服務器每秒達到數百個連接，則通常應將thread_cache_size設置得足夠高，以便大多數新連接使用緩存線程
+    # default value = 8 + ( max_connections / 100) 上限為100。
+    thread_cache_size = 50
+
+    # 內部內存臨時表的最大值。
+    # 比如大數據量的group by，order by時可能用到臨時表，
+    # 超過了這個值將寫入磁盤，系統IO壓力增大
+    tmp_table_size = 64M
+    max_heap_table_size = 64M
+
+    # 是否啟用慢查詢日誌，1為啟用，0為禁用
+    slow_query_log = 1
+
+    # 記錄系統時區
+    # log_timestamps = SYSTEM
+
+    #指定慢查詢日誌文件的路徑和名字
+    slow_query_log_file = /var/lib/mysql/slow.log
+
+    # 慢查詢執行的秒數，必須達到此值可被記錄
+    long_query_time = 20
+
+    # 將沒有使用索引的語句記錄到慢查詢日誌
+    log_queries_not_using_indexes = 0
+
+    # 設定每分鐘記錄到日誌的未使用索引的語句數目，超過這個數目後只記錄語句數量和花費的總時間
+    log_throttle_queries_not_using_indexes = 60
+
+    # 對於查詢掃描行數小於此參數的SQL，將不會記錄到慢查詢日誌中
+    # min_examined_row_limit = 5000
+
+    [mysqld_safe]
+    log-error=/var/log/mysqld.log
+    pid-file=/var/run/mysqld/mysqld.pid
+
+    [client]
+    port=3306
+    socket=/var/run/mysqld/mysqld.sock
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: demo-mysql
+  namespace: java-k8s
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: demo-mysql
-      namespace: java-k8s
   template:
     metadata:
       labels:
@@ -23,12 +122,20 @@ spec:
               value: Java1234!
             - name: MYSQL_DATABASE
               value: mydb
-          command: ["mysqld", "--default-authentication-plugin=mysql_native_password", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+          volumeMounts:
+            - name: mysql-cnf
+              mountPath: /etc/mysql/conf.d/my.cnf
+              subPath: my.cnf
+      volumes:
+        - name: mysql-cnf
+          configMap:
+            name: mysql-cnf
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: demo-mysql
+  namespace: java-k8s
 spec:
   selector:
     app: demo-mysql

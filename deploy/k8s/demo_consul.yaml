@@ -21,7 +21,16 @@ spec:
             - containerPort: 8301
             - containerPort: 8500
             - containerPort: 8600
-          command: ["agent", "-data-dir=/tmp/consul", "-server", "-ui", "-bootstrap", "-datacenter=dc1", "-client=0.0.0.0", "-bind=$(POD_IP)", "-node=server1"]
+          args:
+            - "agent"
+            - "-data-dir=/tmp/consul"
+            - "-server"
+            - "-ui"
+            - "-bootstrap"
+            - "-datacenter=dc1"
+            - "-client=0.0.0.0"
+            - "-bind=$(POD_IP)"
+            - "-node=server1"
           env:
             - name: POD_IP
               valueFrom:
