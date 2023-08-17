@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-spring
+  namespace: java-k8s
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-spring
+  template:
+    metadata:
+      labels:
+        app: demo-spring
+    spec:
+      containers:
+        - name: demo-spring
+          image: demo-spring:0.0.1
+          ports:
+            - containerPort: 9999
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-spring
+  namespace: java-k8s
+spec:
+  selector:
+    app: demo-spring
+  ports:
+    - name: spring-9999
+      protocol: TCP
+      port: 9999
+      targetPort: 9999
+      nodePort: 32005
+  type: NodePort
