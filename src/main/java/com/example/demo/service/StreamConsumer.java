@@ -11,9 +11,9 @@ import java.util.function.Consumer;
 @Slf4j
 @Component
 public class StreamConsumer {
-    private DispatchMsg dispatchMsg;
-    public StreamConsumer(DispatchMsg dispatchMsg) {
-        this.dispatchMsg = dispatchMsg;
+    private DispatchMsgService dispatchMsgService;
+    public StreamConsumer(DispatchMsgService dispatchMsgService) {
+        this.dispatchMsgService = dispatchMsgService;
     }
 
     @Bean
@@ -21,7 +21,7 @@ public class StreamConsumer {
         log.error("init stream consumer");
         return msg -> {
             log.info("stream consumer message => {}", msg);
-            dispatchMsg.dispatchMessage(msg);
+            dispatchMsgService.dispatchMessage(msg);
         };
     }
 
@@ -30,7 +30,7 @@ public class StreamConsumer {
         log.error("init test stream consumer");
         return msg -> {
             log.info("stream test consumer message => {}", msg);
-            dispatchMsg.dispatchMessage(msg);
+            dispatchMsgService.dispatchMessage(msg);
         };
     }
 }

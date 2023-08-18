@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Service
-public class CacheSample {
+public class CacheSampleService {
 
     @Cacheable(value = "user_service", key="#userId", cacheManager = "testManager")
     public User getUser(int userId) {

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class DispatchMsg {
+public class DispatchMsgService {
     public void dispatchMessage(User user){
         log.debug("~~~~~~~~~~~~{}", user.getName());
     }

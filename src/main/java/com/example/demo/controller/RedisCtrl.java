@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.User;
-import com.example.demo.service.CacheSample;
+import com.example.demo.service.CacheSampleService;
 import com.example.demo.utils.JsonUtil;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,11 +19,11 @@ import java.util.Date;
 @RequestMapping("/rds")
 public class RedisCtrl {
     private RedisTemplate redisTemplate;
-    private CacheSample cacheSample;
+    private CacheSampleService cacheSampleService;
 
-    public RedisCtrl(RedisTemplate redisTemplate, CacheSample cacheSample){
+    public RedisCtrl(RedisTemplate redisTemplate, CacheSampleService cacheSampleService){
         this.redisTemplate = redisTemplate;
-        this.cacheSample = cacheSample;
+        this.cacheSampleService = cacheSampleService;
     }
 
     @GetMapping("/test")
@@ -48,7 +48,7 @@ public class RedisCtrl {
 
     @GetMapping("/service_cache/{userId}")
     public User serviceUser(@PathVariable("userId") int userId) {
-        var user = cacheSample.getUser(userId);
+        var user = cacheSampleService.getUser(userId);
         return user;
     }
 }
