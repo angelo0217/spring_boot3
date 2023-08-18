@@ -48,7 +48,6 @@ dependencies {
 
 	//    Spring cloud
 	implementation('org.springframework.cloud:spring-cloud-starter-bootstrap')
-	implementation('org.springframework.cloud:spring-cloud-starter-consul-discovery')
 	implementation('org.springframework.cloud:spring-cloud-starter-openfeign')
 	implementation("org.springframework.cloud:spring-cloud-stream")
 	implementation('org.springframework.cloud:spring-cloud-starter-stream-rabbit')

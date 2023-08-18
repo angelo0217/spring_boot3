@@ -21,31 +21,13 @@ springdoc:
   swagger-ui:
     path: /test
 #http://127.0.0.1:9999/demo/test redirect to http://127.0.0.1:9999/demo/swagger-ui/index.html
+service:
+  provider:
+    url: http://demo-hello:9999
 spring:
   application:
     name: springboot3_demo
   cloud:
-    consul:
-      discovery:
-        health-check-path: ${server.servlet.context-path}/actuator/health
-        health-check-timeout: 15s
-        instance-id: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
-        prefer-ip-address: true
-        service-name: ${prj.consul.name}
-        tags: metrics=true
-      host: demo-consul
-      port: 8500
-    inetutils:
-      ignored-interfaces:
-        - docker0
-        - veth.*
-        - eth1
-        - eth2
-        - eth3
-        - eth4
-      preferred-networks:
-        - 192.0
-        - 10.0
     function:
       definition: msg;test;
     stream:
