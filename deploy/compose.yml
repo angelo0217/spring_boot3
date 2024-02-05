@@ -37,8 +37,14 @@ services:
       #      MYSQL_USER: root
       MYSQL_ROOT_PASSWORD: Java1234!
       MYSQL_DATABASE: mydb
+    volumes:
+      - mysql_data:/var/lib/mysql
     networks:
       - byfn
+
+volumes:
+  mysql_data:
+
 networks:
   byfn:
     name: byfn
