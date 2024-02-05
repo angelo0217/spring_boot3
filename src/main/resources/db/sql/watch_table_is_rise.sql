@@ -1,0 +1,1 @@
+ALTER TABLE watch_stock ADD COLUMN is_rise TINYINT default 0;

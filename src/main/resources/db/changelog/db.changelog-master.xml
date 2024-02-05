@@ -7,5 +7,10 @@
     <changeSet id="1" author="dean">
         <sqlFile path="classpath:db/sql/init_first.sql" relativeToChangelogFile="false" />
     </changeSet>
-
+    <changeSet id="2" author="dean">
+        <sqlFile path="classpath:db/sql/watch_table.sql" relativeToChangelogFile="false" />
+    </changeSet>
+    <changeSet id="3" author="dean">
+        <sqlFile path="classpath:db/sql/watch_table_is_rise.sql" relativeToChangelogFile="false" />
+    </changeSet>
 </databaseChangeLog>

@@ -54,6 +54,17 @@ public abstract class BaseService<DTO, Entity, ID> {
         return false;
     }
 
+    public List<DTO> saveAll(List<DTO> dtos) {
+        List<Entity> entities = dtos.stream()
+                .map(this::convertToEntity)
+                .collect(Collectors.toList());
+        List<Entity> savedEntities = repository.saveAll(entities);
+        return savedEntities.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+
     protected abstract Entity convertToEntity(DTO dto);
 
     protected abstract DTO convertToDto(Entity entity);

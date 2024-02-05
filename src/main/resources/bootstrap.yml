@@ -105,7 +105,7 @@ spring:
     url: jdbc:mysql://demo-mysql:3306/mydb?useUnicode=true&characterEncoding=utf-8&useSSL=false
     username: root
     password: Java1234!
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       connection-timeout: 5000
       maximum-pool-size: 10
@@ -115,6 +115,9 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
     contexts: development
