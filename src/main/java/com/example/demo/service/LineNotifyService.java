@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.example.demo.constant.StockConst;
 import com.example.demo.entity.dto.WatchStockDTO;
 
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +24,10 @@ public class LineNotifyService {
 
 	public void send(WatchStockDTO watch) {
 		String url = "https://notify-api.line.me/api/notify";
-		String message = String.format("\n代號: %s \n 現在金額: %.2f \n 交易量: %d \n 前一日收盤金額: %.2f \n 前一日交易量: %d \n 漲停: %s",
+		String message = String.format(
+				"\n代號: %s \n 現在金額: %.2f \n 交易量: %d \n 前一日收盤金額: %.2f \n 前一日交易量: %d \n 漲停: %s \n 搜尋規則交易量較前日多 %.2f倍",
 				watch.getStockCode(), watch.getDetectMoney(), watch.getDetectVolumes(), watch.getLastDateMoney(),
-				watch.getLastDayVolumes(), watch.is_rise());
+				watch.getLastDayVolumes(), watch.is_rise(), StockConst.MAGNIFICATION);
 		String token = "8ELnpvmW5yabcxMuTpCXq3NIuTMChs4AfHUjm1QOMUiCG";
 
 		HttpHeaders headers = new HttpHeaders();

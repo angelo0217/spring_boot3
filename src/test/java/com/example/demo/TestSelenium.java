@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.example.demo.service.StockCacheService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
@@ -39,6 +40,25 @@ public class TestSelenium {
 
 	@Autowired
 	private LineNotifyService lineNotifyService;
+
+    @Autowired
+    private StockCacheService stockCacheService;
+
+    @Test
+    public void testCache() {
+        if (stockCacheService.getWatchStock("123") == null) {
+            var watch = WatchStockDTO.builder()
+                    .stockCode("123")
+                    .detectVolumes(111233)
+                    .detectMoney(11111.12).lastDateMoney(111233.12)
+                    .lastDayVolumes(12331)
+                    .happenDate(LocalDateTime.now()).build();
+            stockCacheService.saveWatchStock("123", watch);
+            System.out.println("save stock");
+        } else {
+            System.out.println(stockCacheService.getWatchStock("123"));
+        }
+    }
 
     @Test
     public void writeWatch() {

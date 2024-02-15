@@ -14,6 +14,7 @@ import com.example.demo.entity.dto.StockInfoDTO;
 import com.example.demo.entity.dto.StockSingleInfoDTO;
 import com.example.demo.entity.dto.WatchStockDTO;
 import com.example.demo.service.LineNotifyService;
+import com.example.demo.service.StockCacheService;
 import com.example.demo.service.StockDayInfoService;
 import com.example.demo.service.WatchStockService;
 import com.example.demo.utils.StockUtils;
@@ -28,12 +29,14 @@ public class CalculateStockTask implements Runnable {
 	private StockDayInfoService stockDayInfoService;
 	private WatchStockService watchStockService;
 	private LineNotifyService lineNotifyService;
+	private StockCacheService stockCacheService;
 
 	public CalculateStockTask(StockDayInfoService stockDayInfoService, WatchStockService watchStockService,
-			LineNotifyService lineNotifyService) {
+			LineNotifyService lineNotifyService, StockCacheService stockCacheService) {
 		this.stockDayInfoService = stockDayInfoService;
 		this.watchStockService = watchStockService;
 		this.lineNotifyService = lineNotifyService;
+		this.stockCacheService = stockCacheService;
 	}
 
 	public void callSingleStock(StockInfoDTO stockInfoDTO) {
@@ -46,6 +49,7 @@ public class CalculateStockTask implements Runnable {
 					StockSingleInfoDTO.class);
 			if (responseEntity.getStatusCode() == HttpStatusCode.valueOf(200)) {
 				StockSingleInfoDTO info = responseEntity.getBody();
+
 				if (info.getData().getO() != null && info.getData().getO().size() > 0) {
 					Double realTimePrice = info.getData().getO().get(0);
 					if (realTimePrice != null) {
@@ -59,14 +63,18 @@ public class CalculateStockTask implements Runnable {
 						if ((volumes / stockInfoDTO.getVolume()) > StockConst.MAGNIFICATION
 								&& realTimePrice > stockInfoDTO.getClose()) {
 							boolean is_rise = (((realTimePrice - stockInfoDTO.getClose())
-									/ stockInfoDTO.getClose()) > 0.085);
+									/ stockInfoDTO.getClose()) > 0.09);
 							var watch = WatchStockDTO.builder().stockCode(stockInfoDTO.getStockCode())
 									.detectVolumes(volumes).detectMoney(realTimePrice)
 									.lastDateMoney(stockInfoDTO.getClose()).lastDayVolumes(stockInfoDTO.getVolume())
 									.happenDate(LocalDateTime.now()).is_rise(is_rise).build();
-							lineNotifyService.send(watch);
+
 							watchStockService.create(watch);
+							stockCacheService.saveWatchStock(watch.getStockCode(), watch);
 							log.info(" === 偵測到股票: {} 可能出現交易量爆表", stockInfoDTO.getStockCode());
+							if(stockCacheService.getWatchStock(info.getStatusCode()) == null)
+								return;
+							lineNotifyService.send(watch);
 						}
 					}
 				}
