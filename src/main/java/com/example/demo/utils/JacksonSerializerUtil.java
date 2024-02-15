@@ -1,15 +1,14 @@
 package com.example.demo.utils;
 
+import java.text.SimpleDateFormat;
+
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 
 public final class JacksonSerializerUtil {
 

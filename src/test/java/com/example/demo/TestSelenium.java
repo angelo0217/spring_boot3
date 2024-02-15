@@ -1,12 +1,13 @@
 package com.example.demo;
 
-import com.example.demo.constant.StockConst;
-import com.example.demo.entity.dto.StockInfoDTO;
-import com.example.demo.entity.dto.StockSingleInfoDTO;
-import com.example.demo.entity.dto.WatchStockDTO;
-import com.example.demo.service.StockDayInfoService;
-import com.example.demo.service.WatchStockService;
-import com.example.demo.utils.JsonUtil;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
@@ -16,14 +17,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import com.example.demo.constant.StockConst;
+import com.example.demo.entity.dto.StockInfoDTO;
+import com.example.demo.entity.dto.StockSingleInfoDTO;
+import com.example.demo.entity.dto.WatchStockDTO;
+import com.example.demo.service.LineNotifyService;
+import com.example.demo.service.StockDayInfoService;
+import com.example.demo.service.WatchStockService;
+import com.example.demo.utils.JsonUtil;
 
 
 @RunWith(SpringRunner.class)
@@ -36,17 +37,19 @@ public class TestSelenium {
     @Autowired
     private WatchStockService watchStockService;
 
+	@Autowired
+	private LineNotifyService lineNotifyService;
+
     @Test
     public void writeWatch() {
         var watch = WatchStockDTO.builder()
                 .stockCode("123")
                 .detectVolumes(111233)
-                .detectMoney(11111.1)
-                .lastDateMoney(111233.1)
+				.detectMoney(11111.12).lastDateMoney(111233.12)
                 .lastDayVolumes(12331)
                 .happenDate(LocalDateTime.now()).build();
 
-        watchStockService.create(watch);
+		lineNotifyService.send(watch);
     }
 
     @Test
