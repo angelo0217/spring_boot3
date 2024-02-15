@@ -27,21 +27,20 @@ public class StartRunner implements CommandLineRunner {
 	private LineNotifyService lineNotifyService;
     private WatchStockService watchStockService;
     private StockCacheService stockCacheService;
-    private String cronExpression;
 
     public StartRunner(
             BeanFactory beanFactory,
             ScheduledFutureManager scheduledFutureManager,
             StockDayInfoService stockDayInfoService,
-        WatchStockService watchStockService, LineNotifyService lineNotifyService,
-        StockCacheService stockCacheService
+	    WatchStockService watchStockService, LineNotifyService lineNotifyService,
+	    StockCacheService stockCacheService
     ) {
         this.beanFactory = beanFactory;
         this.scheduledFutureManager = scheduledFutureManager;
         this.stockDayInfoService = stockDayInfoService;
         this.watchStockService = watchStockService;
 		this.lineNotifyService = lineNotifyService;
-        this.stockCacheService = stockCacheService;
+		this.stockCacheService = stockCacheService;
     }
 
 
@@ -51,9 +50,9 @@ public class StartRunner implements CommandLineRunner {
         var testTask = beanFactory.getBean(StockInfoAPITask.class, stockDayInfoService);
 		scheduledFutureManager.addCronJob("stockTask", testTask, "0 30 17 ? * MON-FRI");
 //        scheduledFutureManager.addCronJob("stockTask",testTask, "0 35 18 * * ?");
-var calculateTask = beanFactory.getBean(CalculateStockTask.class, stockDayInfoService,
-    watchStockService, lineNotifyService, stockCacheService);
-scheduledFutureManager.addCronJob("calculateTask", calculateTask, cronExpression);
+var calculateTask = beanFactory.getBean(CalculateStockTask.class, stockDayInfoService, watchStockService,
+	lineNotifyService, stockCacheService);
+scheduledFutureManager.addCronJob("calculateTask", calculateTask, "0 0-59/15 9-13 ? * MON-FRI");
 //        scheduledFutureManager.addCronJob("calculateTask",calculateTask, "0 47 16 * * ?");
     }
 
