@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -58,4 +60,7 @@ public class StockInfoDTO {
 
     @JsonProperty("previousMillionAmount")
     private Double previousMillionAmount;
+
+    @JsonProperty("dataDate")
+    private LocalDateTime dataDate;
 }

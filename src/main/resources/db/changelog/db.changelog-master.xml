@@ -13,4 +13,10 @@
     <changeSet id="3" author="dean">
         <sqlFile path="classpath:db/sql/watch_table_is_rise.sql" relativeToChangelogFile="false" />
     </changeSet>
+    <changeSet id="4" author="dean">
+        <sqlFile path="classpath:db/sql/stock_data_add_column.sql" relativeToChangelogFile="false" />
+    </changeSet>
+    <changeSet id="5" author="dean">
+        <sqlFile path="classpath:db/sql/stock_data_add_column2.sql" relativeToChangelogFile="false" />
+    </changeSet>
 </databaseChangeLog>

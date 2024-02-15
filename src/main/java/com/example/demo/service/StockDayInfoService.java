@@ -5,6 +5,8 @@ import com.example.demo.entity.dto.StockInfoDTO;
 import com.example.demo.respository.StockDayInfoRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,16 +19,26 @@ public class StockDayInfoService extends BaseService<StockInfoDTO, StockDayInfo,
         this.stockDayInfoRepository = stockDayInfoRepository;
     }
 
-    public long getTraceDateCnt(Long traceDate) {
-        return this.stockDayInfoRepository.countByTradeDate(traceDate);
+    public long getDataDateCnt(String dataDateStr) {
+        return this.stockDayInfoRepository.countByDataDate(dataDateStr);
     }
 
     public Long getMaxTraceDate(){
         return stockDayInfoRepository.findMaxTraceDate();
     }
 
+    public LocalDateTime getMaxDataDate(){
+        return stockDayInfoRepository.findMaxDataDate();
+    }
+
     public List<StockInfoDTO> getMatchInfoByClose(int greater, int less, Long traceDate) {
         List<StockDayInfo> data = this.stockDayInfoRepository.getAllByCloseGreaterThanAndCloseLessThanAndTradeDateOrderByTradeDateDesc(greater, less, traceDate);
+        return data.stream().map(this::convertToDto).collect(Collectors.toList());
+    }
+
+    public List<StockInfoDTO> getMatchInfoByDataDate(int greater, int less, LocalDateTime dataDate) {
+        String dataDateStr = dataDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        List<StockDayInfo> data = this.stockDayInfoRepository.findAllByCloseGreaterThanAndCloseLessThanAndTradeDateOrderByTradeDateDesc(greater, less, dataDateStr);
         return data.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
@@ -49,6 +61,7 @@ public class StockDayInfoService extends BaseService<StockInfoDTO, StockDayInfo,
         stockDayInfo.setPreviousVolume(stockInfoDTO.getPreviousVolume());
         stockDayInfo.setMillionAmount(stockInfoDTO.getMillionAmount());
         stockDayInfo.setMillionAmount(stockInfoDTO.getMillionAmount());
+        stockDayInfo.setDataDate(LocalDateTime.now());
         return stockDayInfo;
     }
 
@@ -71,6 +84,7 @@ public class StockDayInfoService extends BaseService<StockInfoDTO, StockDayInfo,
                 .previousClose(stockDayInfo.getPreviousClose())
                 .previousVolume(stockDayInfo.getPreviousVolume())
                 .millionAmount(stockDayInfo.getMillionAmount())
+                .dataDate(stockDayInfo.getDataDate())
                 .build();
         return stockInfoDto;
     }

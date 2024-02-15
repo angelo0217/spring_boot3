@@ -97,8 +97,8 @@ public class CalculateStockTask implements Runnable {
 
     @Override
     public void run() {
-        var traceDate = stockDayInfoService.getMaxTraceDate();
-        var infos = stockDayInfoService.getMatchInfoByClose(StockConst.MIN_VAL, StockConst.MAX_VAL, traceDate);
+        var dataDate = stockDayInfoService.getMaxDataDate();
+        var infos = stockDayInfoService.getMatchInfoByDataDate(StockConst.MIN_VAL, StockConst.MAX_VAL, dataDate);
         infos.stream().filter(v -> !v.getStockCode().contains("&"))
                 .filter(v -> isEStock(v.getStockCode()))
                         .forEach(this::callSingleStock);

@@ -1,0 +1,1 @@
+ALTER TABLE watch_stock ADD COLUMN stock_data DATETIME default now();

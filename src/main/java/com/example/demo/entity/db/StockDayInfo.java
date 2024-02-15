@@ -4,6 +4,8 @@ package com.example.demo.entity.db;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Entity
 @Table(name = "stock_data")
@@ -26,4 +28,6 @@ public class StockDayInfo {
     private Double previousClose;
     private Integer previousVolume;
     private Double previousMillionAmount;
+    @Column(name = "dataDate", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private LocalDateTime dataDate;
 }

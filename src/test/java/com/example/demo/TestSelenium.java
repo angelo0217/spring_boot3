@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -53,6 +54,17 @@ public class TestSelenium {
         var traceDate = stockDayInfoService.getMaxTraceDate();
         System.out.println("......" + traceDate);
     }
+
+    @Test
+    public void testTodayData() {
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        var cnt = this.stockDayInfoService.getDataDateCnt(now);
+        System.out.println("--------------"+cnt);
+        var infos = stockDayInfoService.getMatchInfoByDataDate(StockConst.MIN_VAL, StockConst.MAX_VAL, LocalDateTime.now());
+        infos.stream().forEach(System.out::println);
+
+    }
+
 
     @Test
     public void callSingleStock() {
@@ -112,8 +124,9 @@ public class TestSelenium {
 
             List<StockInfoDTO> stockInfoDTOS = Arrays.asList(array);
 
+            String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             var newList = stockInfoDTOS.stream().filter(e -> e.getOpen() > 10.0 && e.getOpen() <= 35.0).collect(Collectors.toList());
-            System.out.println(this.stockDayInfoService.getTraceDateCnt(newList.get(0).getTradeDate()));
+            System.out.println(this.stockDayInfoService.getDataDateCnt(now));
 //            for(StockInfoDTO a: newList){
 //                System.out.println(a);
 //            }

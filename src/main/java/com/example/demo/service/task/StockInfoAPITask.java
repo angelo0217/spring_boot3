@@ -9,6 +9,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -52,13 +54,19 @@ public class StockInfoAPITask implements Runnable{
 
     @Override
     public void run() {
-        log.info("==============================start stock task");
-        List<StockInfoDTO> stockInfoDTOS = this.getStockInfo();
-        var newList = stockInfoDTOS.stream().filter(e -> e.getOpen() > 10.0 && e.getOpen() <= 35.0).collect(Collectors.toList());
-        var cnt = this.stockDayInfoService.getTraceDateCnt(newList.get(0).getTradeDate());
-        if (cnt > 0)
-            log.info("----------- data exist");
-        else
-            this.stockDayInfoService.saveAll(newList);
+        var dataDate = stockDayInfoService.getMaxDataDate();
+        String dataDateStr = dataDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        if (!now.equals(dataDateStr)) {
+            log.info("==============================start stock task");
+            var cnt = this.stockDayInfoService.getDataDateCnt(now);
+            if (cnt > 0)
+                log.info("----------- data exist");
+            else {
+                List<StockInfoDTO> stockInfoDTOS = this.getStockInfo();
+                var newList = stockInfoDTOS.stream().filter(e -> e.getOpen() > 10.0 && e.getOpen() <= 35.0).collect(Collectors.toList());
+                this.stockDayInfoService.saveAll(newList);
+            }
+        }
     }
 }
