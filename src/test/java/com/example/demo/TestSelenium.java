@@ -60,7 +60,7 @@ public class TestSelenium {
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         var cnt = this.stockDayInfoService.getDataDateCnt(now);
         System.out.println("--------------"+cnt);
-        var infos = stockDayInfoService.getMatchInfoByDataDate(StockConst.MIN_VAL, StockConst.MAX_VAL, LocalDateTime.now());
+        var infos = stockDayInfoService.getMatchInfoByDataDate(StockConst.B_MIN_CLOSE, StockConst.B_MAX_CLOSE, LocalDateTime.now());
         infos.stream().forEach(System.out::println);
 
     }

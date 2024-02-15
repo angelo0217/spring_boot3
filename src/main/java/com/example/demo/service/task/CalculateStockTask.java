@@ -13,13 +13,10 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import reactor.core.Disposable;
-import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Scope("prototype")
 @Component("CalculateStockTask")
@@ -43,24 +40,25 @@ public class CalculateStockTask implements Runnable {
             if (responseEntity.getStatusCode() == HttpStatusCode.valueOf(200)) {
                 StockSingleInfoDTO info = responseEntity.getBody();
                 if (info.getData().getO() != null && info.getData().getO().size() > 0) {
-                    Double realTimeValue = info.getData().getO().get(0);
-                    if (realTimeValue != null) {
+                    Double realTimePrice = info.getData().getO().get(0);
+                    if (realTimePrice != null) {
                         Integer volumes = info.getData().getV().stream()
                                 .filter(value -> value != null)
                                 .mapToInt(Double::intValue)
                                 .sum();
                         log.info("code: {}, volume: {}, total v: {}, last: {}, now: {}",
                                 stockInfoDTO.getStockCode(), stockInfoDTO.getVolume(), volumes
-                                , stockInfoDTO.getClose(), realTimeValue);
+                                , stockInfoDTO.getClose(), realTimePrice);
                         if (volumes < StockConst.DEFAULT_VOLUMES)
                             return;
 
-                        if ((volumes / stockInfoDTO.getVolume()) > StockConst.MAGNIFICATION && realTimeValue > stockInfoDTO.getClose()) {
-                            boolean is_rise = (((realTimeValue - stockInfoDTO.getClose()) / stockInfoDTO.getClose()) > 0.085);
+                        if ((volumes / stockInfoDTO.getVolume()) > StockConst.MAGNIFICATION &&
+                                realTimePrice > stockInfoDTO.getClose()) {
+                            boolean is_rise = (((realTimePrice - stockInfoDTO.getClose()) / stockInfoDTO.getClose()) > 0.085);
                             var watch = WatchStockDTO.builder()
                                     .stockCode(stockInfoDTO.getStockCode())
                                     .detectVolumes(volumes)
-                                    .detectMoney(realTimeValue)
+                                    .detectMoney(realTimePrice)
                                     .lastDateMoney(stockInfoDTO.getClose())
                                     .lastDayVolumes(stockInfoDTO.getVolume())
                                     .happenDate(LocalDateTime.now())
@@ -98,7 +96,8 @@ public class CalculateStockTask implements Runnable {
     @Override
     public void run() {
         var dataDate = stockDayInfoService.getMaxDataDate();
-        var infos = stockDayInfoService.getMatchInfoByDataDate(StockConst.MIN_VAL, StockConst.MAX_VAL, dataDate);
+        var infos = stockDayInfoService
+                .getMatchInfoByDataDate(StockConst.B_MIN_CLOSE, StockConst.B_MAX_CLOSE, dataDate);
         infos.stream().filter(v -> !v.getStockCode().contains("&"))
                 .filter(v -> isEStock(v.getStockCode()))
                         .forEach(this::callSingleStock);

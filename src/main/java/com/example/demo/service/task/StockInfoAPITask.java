@@ -1,5 +1,6 @@
 package com.example.demo.service.task;
 
+import com.example.demo.constant.StockConst;
 import com.example.demo.entity.dto.StockInfoDTO;
 import com.example.demo.service.StockDayInfoService;
 import com.example.demo.utils.JsonUtil;
@@ -58,13 +59,15 @@ public class StockInfoAPITask implements Runnable{
         String dataDateStr = dataDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         if (!now.equals(dataDateStr)) {
-            log.info("==============================start stock task");
             var cnt = this.stockDayInfoService.getDataDateCnt(now);
             if (cnt > 0)
                 log.info("----------- data exist");
             else {
+                log.info("==============================start stock task");
                 List<StockInfoDTO> stockInfoDTOS = this.getStockInfo();
-                var newList = stockInfoDTOS.stream().filter(e -> e.getOpen() > 10.0 && e.getOpen() <= 35.0).collect(Collectors.toList());
+                var newList = stockInfoDTOS.stream()
+                        .filter(e -> e.getClose() > StockConst.MIN_CLOSE && e.getClose() <= StockConst.MAX_CLOSE)
+                        .collect(Collectors.toList());
                 this.stockDayInfoService.saveAll(newList);
             }
         }
