@@ -26,4 +26,7 @@ public interface StockDayInfoRepository extends JpaRepository<StockDayInfo, Inte
     @Query("SELECT s FROM StockDayInfo s WHERE s.close > :greater AND s.close < :less AND DATE_FORMAT(s.dataDate, '%Y-%m-%d') = :dataDate ORDER BY s.dataDate DESC")
     List<StockDayInfo> findAllByCloseGreaterThanAndCloseLessThanAndTradeDateOrderByTradeDateDesc(@Param("greater") int greater, @Param("less") int less, @Param("dataDate") String dataDate);
 
+    @Query("SELECT s FROM StockDayInfo s WHERE s.stockCode = :stockCode AND DATE_FORMAT(s.dataDate, '%Y-%m-%d') < :dataDate ORDER BY s.dataDate DESC limit 3")
+    List<StockDayInfo> findBeforeData(@Param("stockCode") String stockCode, @Param("dataDate") String dataDate);
+
 }

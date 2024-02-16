@@ -31,7 +31,7 @@ public class RedisConfig implements CachingConfigurer {
     @Bean("testManager")
     public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
         RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(75)); // 设置缓存项的过期时间为10分钟
+                .entryTtl(Duration.ofMinutes(120)); // 设置缓存项的过期时间为10分钟
 
         return RedisCacheManager.builder(RedisCacheWriter.nonLockingRedisCacheWriter(redisConnectionFactory))
                 .cacheDefaults(cacheConfiguration)

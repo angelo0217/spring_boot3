@@ -44,20 +44,39 @@ public class TestSelenium {
     @Autowired
     private StockCacheService stockCacheService;
 
+
+    @Test
+    public void testBeforeData(){
+        var data = stockDayInfoService.getBeforeData("1449", LocalDateTime.now());
+        data.stream().forEach(System.out::println);
+    }
+
+    @Test
+    public void testReason() {
+        var reason = StockConst.REASON.getStockReason(1500, 1400,
+                80.0, 70.0);
+        if (!reason.equals(StockConst.REASON.NOTHING)) {
+            System.out.println("1234 " + reason.getDescription());
+        } else {
+            System.out.println("1234");
+        }
+    }
+
     @Test
     public void testCache() {
-        if (stockCacheService.getWatchStock("123") == null) {
-            var watch = WatchStockDTO.builder()
-                    .stockCode("123")
-                    .detectVolumes(111233)
-                    .detectMoney(11111.12).lastDateMoney(111233.12)
-                    .lastDayVolumes(12331)
-                    .happenDate(LocalDateTime.now()).build();
-            stockCacheService.saveWatchStock("123", watch);
-            System.out.println("save stock");
-        } else {
-            System.out.println(stockCacheService.getWatchStock("123"));
-        }
+        System.out.println(stockCacheService.getWatchStock("9934a"));
+//        if (stockCacheService.getWatchStock("9934") != null) {
+//            var watch = WatchStockDTO.builder()
+//                    .stockCode("123")
+//                    .detectVolumes(111233)
+//                    .detectMoney(11111.12).lastDateMoney(111233.12)
+//                    .lastDayVolumes(12331)
+//                    .happenDate(LocalDateTime.now()).build();
+//            stockCacheService.saveWatchStock("123", watch);
+//            System.out.println("save stock");
+//        } else {
+//            System.out.println(stockCacheService.getWatchStock("9934"));
+//        }
     }
 
     @Test
@@ -69,7 +88,7 @@ public class TestSelenium {
                 .lastDayVolumes(12331)
                 .happenDate(LocalDateTime.now()).build();
 
-		lineNotifyService.send(watch);
+		lineNotifyService.send(watch, StockConst.REASON.RISE);
     }
 
     @Test

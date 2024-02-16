@@ -11,7 +11,7 @@ import com.example.demo.entity.dto.WatchStockDTO;
 @CacheConfig(cacheNames = "stock_service")
 public class StockCacheService {
 
-    @Cacheable(key="#stockCode", cacheManager = "testManager")
+    @Cacheable(key="#stockCode", cacheManager = "testManager", unless="#result == null")
     public WatchStockDTO getWatchStock(String stockCode ) {
         return null;
     }

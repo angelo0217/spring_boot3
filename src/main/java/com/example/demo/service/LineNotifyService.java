@@ -22,13 +22,14 @@ public class LineNotifyService {
 		this.restTemplate = restTemplate;
 	}
 
-	public void send(WatchStockDTO watch) {
+    public void send(WatchStockDTO watch, StockConst.REASON reason) {
+        var wording = reason.getDescription();
 		String url = "https://notify-api.line.me/api/notify";
 		String message = String.format(
-				"\n代號: %s \n 現在金額: %.2f \n 交易量: %d \n 前一日收盤金額: %.2f \n 前一日交易量: %d \n 漲停: %s \n 搜尋規則交易量較前日多 %.2f倍",
+            "\n代號: %s \n 現在金額: %.2f \n 交易量: %d \n 前一日收盤金額: %.2f \n 前一日交易量: %d \n 漲停: %s \n 符合條件: %s",
 				watch.getStockCode(), watch.getDetectMoney(), watch.getDetectVolumes(), watch.getLastDateMoney(),
-				watch.getLastDayVolumes(), watch.is_rise(), StockConst.MAGNIFICATION);
-		String token = "8ELnpvmW5yabcxMuTpCXq3NIuTMChs4AfHUjm1QOMUiCG";
+            watch.getLastDayVolumes(), watch.is_rise(), wording);
+        String token = "8ELnpvmW5yabcxMuTpCXq3NIuTMChs4AfHUjm1QOMUiCG";
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", "Bearer " + token);

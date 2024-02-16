@@ -39,47 +39,64 @@ public class CalculateStockTask implements Runnable {
 		this.stockCacheService = stockCacheService;
 	}
 
+
+    public StockSingleInfoDTO getStockInfo(String stockCode) {
+      RestTemplate restTemplate = new RestTemplate();
+      String apiUrl = "https://ws.api.cnyes.com/ws/api/v1/charting/history?resolution=1&symbol=TWS:"
+          + stockCode + ":STOCK&quote=1";
+
+      ResponseEntity<StockSingleInfoDTO> responseEntity =
+          restTemplate.exchange(apiUrl, HttpMethod.GET, null, StockSingleInfoDTO.class);
+      if (responseEntity.getStatusCode() == HttpStatusCode.valueOf(200))
+        return responseEntity.getBody();
+
+	  log.error("failed to call api {}", responseEntity);
+      throw new RuntimeException("no data");
+    }
+
 	public void callSingleStock(StockInfoDTO stockInfoDTO) {
-		RestTemplate restTemplate = new RestTemplate();
-		String apiUrl = "https://ws.api.cnyes.com/ws/api/v1/charting/history?resolution=1&symbol=TWS:"
-				+ stockInfoDTO.getStockCode() + ":STOCK&quote=1";
+
 
 		try {
-			ResponseEntity<StockSingleInfoDTO> responseEntity = restTemplate.exchange(apiUrl, HttpMethod.GET, null,
-					StockSingleInfoDTO.class);
-			if (responseEntity.getStatusCode() == HttpStatusCode.valueOf(200)) {
-				StockSingleInfoDTO info = responseEntity.getBody();
+			StockSingleInfoDTO info = getStockInfo(stockInfoDTO.getStockCode());
 
-				if (info.getData().getO() != null && info.getData().getO().size() > 0) {
-					Double realTimePrice = info.getData().getO().get(0);
-					if (realTimePrice != null) {
-						Integer volumes = info.getData().getV().stream().filter(value -> value != null)
-								.mapToInt(Double::intValue).sum();
-						log.info("code: {}, volume: {}, total v: {}, last: {}, now: {}", stockInfoDTO.getStockCode(),
-								stockInfoDTO.getVolume(), volumes, stockInfoDTO.getClose(), realTimePrice);
-						if (volumes < StockConst.DEFAULT_VOLUMES)
-							return;
+			if (info.getData().getO() != null && info.getData().getO().size() > 0) {
+				var data = stockDayInfoService.getBeforeData(info.getStatusCode(), LocalDateTime.now());
+				var cnt = data.stream()
+						.filter(v -> (v.getClose() - v.getOpen()) / v.getOpen() > 0.05 && v.getVolume() > StockConst.DEFAULT_VOLUMES)
+						.count();
 
-						if ((volumes / stockInfoDTO.getVolume()) > StockConst.MAGNIFICATION
-								&& realTimePrice > stockInfoDTO.getClose()) {
-							boolean is_rise = (((realTimePrice - stockInfoDTO.getClose())
-									/ stockInfoDTO.getClose()) > 0.09);
-							var watch = WatchStockDTO.builder().stockCode(stockInfoDTO.getStockCode())
-									.detectVolumes(volumes).detectMoney(realTimePrice)
-									.lastDateMoney(stockInfoDTO.getClose()).lastDayVolumes(stockInfoDTO.getVolume())
-									.happenDate(LocalDateTime.now()).is_rise(is_rise).build();
+				if(cnt >=2) {
+					log.info("{}, 3日內漲幅超過5% 2次以上", info.getStatusCode());
+					return;
+				}
 
-							watchStockService.create(watch);
-							stockCacheService.saveWatchStock(watch.getStockCode(), watch);
-							log.info(" === 偵測到股票: {} 可能出現交易量爆表", stockInfoDTO.getStockCode());
-							if(stockCacheService.getWatchStock(info.getStatusCode()) == null)
-								return;
-							lineNotifyService.send(watch);
-						}
+				Double realTimePrice = info.getData().getO().get(0);
+				if (realTimePrice != null) {
+					Integer volumes = info.getData().getV().stream()
+							.filter(value -> value != null)
+							.mapToInt(Double::intValue).sum();
+					if (volumes < StockConst.DEFAULT_VOLUMES)
+						return;
+
+					log.info("code: {}, volume: {}, total v: {}, last: {}, now: {}", stockInfoDTO.getStockCode(),
+							stockInfoDTO.getVolume(), volumes, stockInfoDTO.getClose(), realTimePrice);
+
+					var reason = StockConst.REASON.getStockReason(volumes, stockInfoDTO.getVolume(),
+							realTimePrice, stockInfoDTO.getClose());
+					if (reason.equals(StockConst.REASON.MAGNIFICATION)) {
+						boolean is_rise = (((realTimePrice - stockInfoDTO.getClose()) / stockInfoDTO.getClose()) > 0.09);
+						var watch = WatchStockDTO.builder().stockCode(stockInfoDTO.getStockCode())
+								.detectVolumes(volumes).detectMoney(realTimePrice)
+								.lastDateMoney(stockInfoDTO.getClose()).lastDayVolumes(stockInfoDTO.getVolume())
+								.happenDate(LocalDateTime.now()).is_rise(is_rise).build();
+
+						watchStockService.create(watch);
+						if(stockCacheService.getWatchStock(info.getStatusCode()) == null)
+							lineNotifyService.send(watch, reason);
+						stockCacheService.saveWatchStock(watch.getStockCode(), watch);
 					}
 				}
-			} else {
-				log.error("{} call api error {}}", stockInfoDTO.getStockCode(), responseEntity.getStatusCode());
 			}
 		} catch (Exception ex) {
 			log.error("{} call api error", stockInfoDTO.getStockCode(), ex);

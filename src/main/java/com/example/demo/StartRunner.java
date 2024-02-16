@@ -53,7 +53,7 @@ public class StartRunner implements CommandLineRunner {
 var calculateTask = beanFactory.getBean(CalculateStockTask.class, stockDayInfoService, watchStockService,
 	lineNotifyService, stockCacheService);
 scheduledFutureManager.addCronJob("calculateTask", calculateTask, "0 0-59/15 9-13 ? * MON-FRI");
-//        scheduledFutureManager.addCronJob("calculateTask",calculateTask, "0 47 16 * * ?");
+//        scheduledFutureManager.addCronJob("calculateTask",calculateTask, "0 16 09 * * ?");
     }
 
 }
