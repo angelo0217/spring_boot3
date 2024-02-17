@@ -1,5 +1,10 @@
 package com.example.demo.service.task;
 
+import com.example.demo.constant.StockConst;
+import com.example.demo.entity.dto.StockInfoDTO;
+import com.example.demo.service.StockDayInfoService;
+import com.example.demo.utils.JsonUtil;
+import com.example.demo.utils.StockUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -7,32 +12,23 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.example.demo.constant.StockConst;
-import com.example.demo.entity.dto.StockInfoDTO;
-import com.example.demo.service.StockDayInfoService;
-import com.example.demo.utils.JsonUtil;
-import com.example.demo.utils.StockUtils;
-
-import lombok.extern.slf4j.Slf4j;
-
 @Scope("prototype")
 @Component("StockInfoAPITask")
 @Slf4j
-public class StockInfoAPITask implements Runnable{
+public class StockInfoAPITask implements Runnable {
 
     private StockDayInfoService stockDayInfoService;
+    private String apiUrl = "https://www.wantgoo.com/investrue/all-quote-info";
 
-    public StockInfoAPITask(StockDayInfoService stockDayInfoService){
+    public StockInfoAPITask(StockDayInfoService stockDayInfoService) {
         this.stockDayInfoService = stockDayInfoService;
     }
-
-    private String apiUrl = "https://www.wantgoo.com/investrue/all-quote-info";
 
     public List<StockInfoDTO> getStockInfo() {
         System.setProperty("webdriver.chrome.driver", "src\\main\\resources\\driver\\chromedriver.exe");
@@ -59,22 +55,29 @@ public class StockInfoAPITask implements Runnable{
     @Override
     public void run() {
         var dataDate = stockDayInfoService.getMaxDataDate();
-		String dataDateStr = (dataDate == null) ? "" : dataDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String dataDateStr = (dataDate == null) ? "" : dataDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         if (!now.equals(dataDateStr)) {
             var cnt = this.stockDayInfoService.getDataDateCnt(now);
-            if (cnt > 0)
+            if (cnt > 0) {
                 log.info("----------- data exist");
-            else {
+            } else {
+                var tradeDate = stockDayInfoService.getMaxTraceDate();
                 log.info("==============================start stock task");
                 List<StockInfoDTO> stockInfoDTOS = this.getStockInfo();
                 var newList = stockInfoDTOS.stream()
-						.filter(v -> StockUtils.isEStock(v.getStockCode()))
-                        .filter(e -> e.getClose() > StockConst.MIN_CLOSE && e.getClose() <= StockConst.MAX_CLOSE)
-                        .collect(Collectors.toList());
-                this.stockDayInfoService.saveAll(newList);
+                                           .filter(v -> StockUtils.isEStock(v.getStockCode()))
+                                           .filter(e -> e.getClose() > StockConst.MIN_CLOSE
+                                                   && e.getClose() <= StockConst.MAX_CLOSE)
+                                           .collect(Collectors.toList());
+                if (tradeDate != stockInfoDTOS.get(0).getTradeDate()) {
+                    this.stockDayInfoService.saveAll(newList);
+                } else {
+                    log.info("----------- data exist");
+                }
             }
-		} else
-			log.info("----------- data exist");
+        } else {
+            log.info("----------- data exist");
+        }
     }
 }

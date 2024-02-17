@@ -45,9 +45,9 @@ public class StockDayInfoService extends BaseService<StockInfoDTO, StockDayInfo,
 		return data.stream().map(this::convertToDto).collect(Collectors.toList());
 	}
 
-	public List<StockInfoDTO> getBeforeData(String stockCode, LocalDateTime dateTime) {
+	public List<StockInfoDTO> getBeforeData(String stockCode, LocalDateTime dateTime, int limit) {
 		String dataDateStr = dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-		List<StockDayInfo> data = this.stockDayInfoRepository.findBeforeData(stockCode, dataDateStr);
+		List<StockDayInfo> data = this.stockDayInfoRepository.findBeforeData(stockCode, dataDateStr, limit);
 		return data.stream().map(this::convertToDto).collect(Collectors.toList());
 	}
 

@@ -1,13 +1,12 @@
 package com.example.demo.respository;
 
 import com.example.demo.entity.db.StockDayInfo;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Repository
 public interface StockDayInfoRepository extends JpaRepository<StockDayInfo, Integer> {
@@ -24,9 +23,14 @@ public interface StockDayInfoRepository extends JpaRepository<StockDayInfo, Inte
 
 
     @Query("SELECT s FROM StockDayInfo s WHERE s.close > :greater AND s.close < :less AND DATE_FORMAT(s.dataDate, '%Y-%m-%d') = :dataDate ORDER BY s.dataDate DESC")
-    List<StockDayInfo> findAllByCloseGreaterThanAndCloseLessThanAndTradeDateOrderByTradeDateDesc(@Param("greater") int greater, @Param("less") int less, @Param("dataDate") String dataDate);
+    List<StockDayInfo> findAllByCloseGreaterThanAndCloseLessThanAndTradeDateOrderByTradeDateDesc(
+            @Param("greater") int greater, @Param("less") int less, @Param("dataDate") String dataDate
+    );
 
-    @Query("SELECT s FROM StockDayInfo s WHERE s.stockCode = :stockCode AND DATE_FORMAT(s.dataDate, '%Y-%m-%d') < :dataDate ORDER BY s.dataDate DESC limit 3")
-    List<StockDayInfo> findBeforeData(@Param("stockCode") String stockCode, @Param("dataDate") String dataDate);
+    @Query("SELECT s FROM StockDayInfo s WHERE s.stockCode = :stockCode AND DATE_FORMAT(s.dataDate, '%Y-%m-%d') < :dataDate ORDER BY s.dataDate DESC limit :limit")
+    List<StockDayInfo> findBeforeData(
+            @Param("stockCode") String stockCode, @Param("dataDate") String dataDate,
+            @Param("limit") int limit
+    );
 
 }

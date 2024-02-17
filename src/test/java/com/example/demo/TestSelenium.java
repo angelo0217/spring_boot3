@@ -47,7 +47,7 @@ public class TestSelenium {
 
     @Test
     public void testBeforeData(){
-        var data = stockDayInfoService.getBeforeData("1449", LocalDateTime.now());
+        var data = stockDayInfoService.getBeforeData("1449", LocalDateTime.now(), 2);
         data.stream().forEach(System.out::println);
     }
 
