@@ -1,6 +1,7 @@
 package com.example.demo.service.task;
 
 import com.example.demo.constant.StockConst;
+import com.example.demo.constant.StockConst.REASON;
 import com.example.demo.entity.dto.StockInfoDTO;
 import com.example.demo.entity.dto.StockSingleInfoDTO;
 import com.example.demo.entity.dto.WatchStockDTO;
@@ -95,7 +96,7 @@ public class CalculateStockTask implements Runnable {
                         realTimePrice,
                         stockInfoDTO.getClose()
                 );
-                if (reason.equals(StockConst.REASON.MAGNIFICATION)) {
+                if (reason.equals(StockConst.REASON.MAGNIFICATION_UP) || reason.equals(REASON.MAGNIFICATION_DOWN)) {
                     boolean is_rise = (
                             ((realTimePrice - stockInfoDTO.getClose()) / stockInfoDTO.getClose())
                                     > 0.09);

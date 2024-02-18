@@ -1,5 +1,6 @@
 package com.example.demo;
 
+import com.example.demo.constant.StockConst.REASON;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -64,31 +65,33 @@ public class TestSelenium {
 
     @Test
     public void testCache() {
-        System.out.println(stockCacheService.getWatchStock("9934a"));
-//        if (stockCacheService.getWatchStock("9934") != null) {
-//            var watch = WatchStockDTO.builder()
-//                    .stockCode("123")
-//                    .detectVolumes(111233)
-//                    .detectMoney(11111.12).lastDateMoney(111233.12)
-//                    .lastDayVolumes(12331)
-//                    .happenDate(LocalDateTime.now()).build();
-//            stockCacheService.saveWatchStock("123", watch);
-//            System.out.println("save stock");
-//        } else {
-//            System.out.println(stockCacheService.getWatchStock("9934"));
-//        }
+        for (int i = 0; i < 5; i++) {
+            if (stockCacheService.getWatchStock("9934") == null) {
+                System.out.println(stockCacheService.getWatchStock("9934"));
+                var watch = WatchStockDTO.builder()
+                                         .stockCode("123")
+                                         .detectVolumes(111233)
+                                         .detectMoney(11111.12).lastDateMoney(111233.12)
+                                         .lastDayVolumes(12331)
+                                         .happenDate(LocalDateTime.now()).build();
+                stockCacheService.saveWatchStock("9934", watch);
+                System.out.println("save stock");
+            } else {
+                System.out.println(stockCacheService.getWatchStock("9934"));
+            }
+        }
     }
 
     @Test
     public void writeWatch() {
         var watch = WatchStockDTO.builder()
-                .stockCode("123")
-                .detectVolumes(111233)
-				.detectMoney(11111.12).lastDateMoney(111233.12)
-                .lastDayVolumes(12331)
+                .stockCode("測試")
+                .detectVolumes(1500)
+				.detectMoney(14.1).lastDateMoney(14.7)
+                .lastDayVolumes(500)
                 .happenDate(LocalDateTime.now()).build();
 
-		lineNotifyService.send(watch, StockConst.REASON.RISE);
+		lineNotifyService.send(watch, REASON.MAGNIFICATION_DOWN);
     }
 
     @Test

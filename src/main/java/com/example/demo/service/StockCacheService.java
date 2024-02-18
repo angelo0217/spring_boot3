@@ -15,7 +15,7 @@ public class StockCacheService {
         return null;
     }
 
-    @CachePut(key = "#stockCode", cacheManager = "testManager")
+    @CachePut(key = "#stockCode", cacheManager = "testManager", unless = "#result == null")
     public WatchStockDTO saveWatchStock(String stockCode, WatchStockDTO watchStockDTO) {
         return watchStockDTO;
     }
