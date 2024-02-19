@@ -55,7 +55,7 @@ public class TestSelenium {
     @Test
     public void testReason() {
         var reason = StockConst.REASON.getStockReason(1500, 1400,
-                80.0, 70.0);
+                80.0, 70.0, null);
         if (!reason.equals(StockConst.REASON.NOTHING)) {
             System.out.println("1234 " + reason.getDescription());
         } else {
@@ -65,19 +65,20 @@ public class TestSelenium {
 
     @Test
     public void testCache() {
+        var stockCode = "8110";
         for (int i = 0; i < 5; i++) {
-            if (stockCacheService.getWatchStock("9934") == null) {
-                System.out.println(stockCacheService.getWatchStock("9934"));
-                var watch = WatchStockDTO.builder()
-                                         .stockCode("123")
-                                         .detectVolumes(111233)
-                                         .detectMoney(11111.12).lastDateMoney(111233.12)
-                                         .lastDayVolumes(12331)
-                                         .happenDate(LocalDateTime.now()).build();
-                stockCacheService.saveWatchStock("9934", watch);
+            if (stockCacheService.getWatchStock(stockCode) == null) {
+//                System.out.println(stockCacheService.getWatchStock(stockCode));
+//                var watch = WatchStockDTO.builder()
+//                                         .stockCode(stockCode)
+//                                         .detectVolumes(111233)
+//                                         .detectMoney(11111.12).lastDateMoney(111233.12)
+//                                         .lastDayVolumes(12331)
+//                                         .happenDate(LocalDateTime.now()).build();
+//                stockCacheService.saveWatchStock(stockCode, watch);
                 System.out.println("save stock");
             } else {
-                System.out.println(stockCacheService.getWatchStock("9934"));
+                System.out.println(stockCacheService.getWatchStock(stockCode));
             }
         }
     }

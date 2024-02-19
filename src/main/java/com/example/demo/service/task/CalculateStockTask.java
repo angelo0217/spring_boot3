@@ -54,6 +54,8 @@ public class CalculateStockTask implements Runnable {
             var info = responseEntity.getBody();
             if (info.getData().getO() != null && info.getData().getO().size() > 0) {
                 return info;
+            } else {
+                return null;
             }
         }
         log.error("failed to call api {}", responseEntity);
@@ -64,6 +66,9 @@ public class CalculateStockTask implements Runnable {
 
         try {
             StockSingleInfoDTO info = getStockInfo(stockInfoDTO.getStockCode());
+            if (info == null) {
+                return;
+            }
 
             var data = stockDayInfoService.getBeforeData(info.getStatusCode(), LocalDateTime.now(),
                     StockConst.RISE_REF_DATE
@@ -94,9 +99,10 @@ public class CalculateStockTask implements Runnable {
 
                 var reason = StockConst.REASON.getStockReason(volumes, stockInfoDTO.getVolume(),
                         realTimePrice,
-                        stockInfoDTO.getClose()
+                        stockInfoDTO.getClose(),
+                        data
                 );
-                if (reason.equals(StockConst.REASON.MAGNIFICATION_UP) || reason.equals(REASON.MAGNIFICATION_DOWN)) {
+                if (!reason.equals(REASON.NOTHING) || !reason.equals(REASON.RISE)) {
                     boolean is_rise = (
                             ((realTimePrice - stockInfoDTO.getClose()) / stockInfoDTO.getClose())
                                     > 0.09);
@@ -106,10 +112,10 @@ public class CalculateStockTask implements Runnable {
                                              .happenDate(LocalDateTime.now()).is_rise(is_rise).build();
 
                     watchStockService.create(watch);
-                    if (stockCacheService.getWatchStock(info.getStatusCode()) == null) {
+                    if (stockCacheService.getWatchStock(stockInfoDTO.getStockCode()) == null) {
                         lineNotifyService.send(watch, reason);
+                        stockCacheService.saveWatchStock(watch.getStockCode(), watch);
                     }
-                    stockCacheService.saveWatchStock(watch.getStockCode(), watch);
                 }
             }
 

@@ -110,7 +110,7 @@ spring:
       connection-timeout: 5000
       maximum-pool-size: 10
   jpa:
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
