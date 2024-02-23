@@ -22,18 +22,20 @@ public class LineNotifyService {
     }
 
     public void send(WatchStockDTO watch, StockConst.REASON reason) {
-        var wording = (
-                reason.equals(REASON.ABOUT_TO_OPEN_UP) || reason.equals(REASON.ABOUT_TO_OPEN_UP_DAY2)
-        ) ? reason.getDescription() : String.format(
+        var wording = String.format(
                 reason.getDescription(),
                 (watch.getDetectVolumes() / watch.getLastDayVolumes()),
                 ((watch.getDetectMoney() - watch.getLastDateMoney()) / watch.getLastDateMoney() * 100)
         );
+        this.send(watch, wording);
+    }
+
+    public void send(WatchStockDTO watch, String reason) {
         String url = "https://notify-api.line.me/api/notify";
         String message = String.format(
                 "\n 代號: %s \n 現在金額: %.2f \n 交易量: %d \n 前一日收盤金額: %.2f \n 前一日交易量: %d \n 漲停: %s \n 符合條件: %s",
                 watch.getStockCode(), watch.getDetectMoney(), watch.getDetectVolumes(), watch.getLastDateMoney(),
-                watch.getLastDayVolumes(), watch.is_rise(), wording
+                watch.getLastDayVolumes(), watch.is_rise(), reason
         );
         String token = "8ELnpvmW5yabcxMuTpCXq3NIuTMChs4AfHUjm1QOMUiCG";
 

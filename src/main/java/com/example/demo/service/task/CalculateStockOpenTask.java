@@ -1,7 +1,6 @@
 package com.example.demo.service.task;
 
 import com.example.demo.constant.StockConst;
-import com.example.demo.constant.StockConst.REASON;
 import com.example.demo.entity.dto.StockInfoDTO;
 import com.example.demo.entity.dto.StockSingleInfoDTO;
 import com.example.demo.entity.dto.WatchStockDTO;
@@ -9,7 +8,6 @@ import com.example.demo.service.LineNotifyService;
 import com.example.demo.service.StockCacheService;
 import com.example.demo.service.StockDayInfoService;
 import com.example.demo.service.StockSinglyService;
-import com.example.demo.service.WatchStockService;
 import com.example.demo.utils.StockUtils;
 import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
@@ -17,25 +15,22 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Scope("prototype")
-@Component("CalculateStockTask")
+@Component("CalculateStockOpenTask")
 @Slf4j
-public class CalculateStockTask implements Runnable {
+public class CalculateStockOpenTask implements Runnable {
 
     private final StockDayInfoService stockDayInfoService;
-    private final WatchStockService watchStockService;
     private final LineNotifyService lineNotifyService;
     private final StockCacheService stockCacheService;
     private final StockSinglyService stockSinglyService;
 
-    public CalculateStockTask(
+    public CalculateStockOpenTask(
             StockDayInfoService stockDayInfoService,
-            WatchStockService watchStockService,
             LineNotifyService lineNotifyService,
             StockCacheService stockCacheService,
             StockSinglyService stockSinglyService
     ) {
         this.stockDayInfoService = stockDayInfoService;
-        this.watchStockService = watchStockService;
         this.stockCacheService = stockCacheService;
         this.lineNotifyService = lineNotifyService;
         this.stockSinglyService = stockSinglyService;
@@ -45,58 +40,39 @@ public class CalculateStockTask implements Runnable {
 
         try {
             StockSingleInfoDTO info = stockSinglyService.getStockInfo(stockInfoDTO.getStockCode());
-            if (info == null) {
-                return;
-            }
-
-            if (info.getRealTimePrice() != null) {
-                if (info.getRealTimeVolume() < StockConst.DEFAULT_VOLUMES) {
+            if (info != null) {
+                if (!StockUtils.isKeepFall(stockDayInfoService, stockInfoDTO.getStockCode(), 2)) {
                     return;
                 }
 
-                log.info("code: {}, volume: {}, total v: {}, last: {}, now: {}",
-                        stockInfoDTO.getStockCode(),
-                        stockInfoDTO.getVolume(), info.getRealTimeVolume(), stockInfoDTO.getClose(),
-                        info.getRealTimePrice()
-                );
-                var watch = WatchStockDTO.builder().stockCode(stockInfoDTO.getStockCode())
+                if (info.getRealTimePrice() != null) {
+                    if (stockInfoDTO.isRise(info.getRealTimePrice())) {
+                        return;
+                    }
+                    var watch =
+                            WatchStockDTO.builder().stockCode(stockInfoDTO.getStockCode())
                                          .detectVolumes(info.getRealTimeVolume())
-                                         .detectMoney(info.getRealTimePrice())
-                                         .lastDateMoney(stockInfoDTO.getClose())
+                                         .detectMoney(info.getRealTimePrice()).lastDateMoney(stockInfoDTO.getClose())
                                          .lastDayVolumes(stockInfoDTO.getVolume())
                                          .happenDate(LocalDateTime.now())
                                          .is_rise(stockInfoDTO.isRise(info.getRealTimePrice())).build();
 
-                var reason = StockConst.REASON.getStockReason(
-                        info.getRealTimeVolume(),
-                        stockInfoDTO.getVolume(),
-                        info.getRealTimePrice(),
-                        stockInfoDTO.getClose()
-                );
-                if (!reason.equals(StockConst.REASON.NOTHING)) {
-                    if (reason.equals(REASON.MAGNIFICATION_UP)) {
-                        watchStockService.create(watch);
+                    var cacheInfo = stockCacheService.getSpecialWatchStock(stockInfoDTO.getStockCode());
+                    if (cacheInfo != null) {
+                        if (cacheInfo.getDetectMoney() < watch.getDetectMoney()
+                                && watch.getDetectMoney() > stockInfoDTO.getClose()
+                                && (watch.getDetectMoney() - stockInfoDTO.getClose()) / stockInfoDTO.getClose() > 0.02
+                        ) {
+                            lineNotifyService.send(watch, "開盤 900-930，前2日跌，目前持續漲幅");
+                        }
                     }
-
-                    if (stockCacheService.getWatchStock(stockInfoDTO.getStockCode()) == null) {
-                        lineNotifyService.send(watch, reason);
-                        stockCacheService.saveWatchStock(watch.getStockCode(), watch);
-                    }
+                    stockCacheService.saveSpecialWatchStock(stockInfoDTO.getStockCode(), watch);
                 }
             }
-
         } catch (Exception ex) {
             log.error("{} call api error", stockInfoDTO.getStockCode(), ex);
         }
     }
-
-    // private static boolean isTPEXStock(String stockCode) {
-    // // 上櫃股票代码以 "5" 开头
-    // String tpexRegex = "^5\\d{3}$";
-    // Pattern pattern = Pattern.compile(tpexRegex);
-    // Matcher matcher = pattern.matcher(stockCode);
-    // return matcher.matches();
-    // }
 
     @Override
     public void run() {
@@ -106,10 +82,7 @@ public class CalculateStockTask implements Runnable {
         );
         infos.stream().filter(v -> !v.getStockCode().contains("&"))
              .filter(v -> StockUtils.isEStock(v.getStockCode()))
+             .filter(v -> v.getClose() < v.getOpen())
              .forEach(this::callSingleStock);
-        // Flux.fromIterable(infos)
-        // .filter(v -> !v.getStockCode().contains("&"))
-        // .filter(v -> isEStock(v.getStockCode()))
-        // .subscribe(this::callSingleStock);
     }
 }

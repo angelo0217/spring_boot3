@@ -20,4 +20,14 @@ public class StockCacheService {
         return watchStockDTO;
     }
 
+    @Cacheable(value = "special_stock", key = "#stockCode", cacheManager = "testManager", unless = "#result == null")
+    public WatchStockDTO getSpecialWatchStock(String stockCode) {
+        return null;
+    }
+
+    @CachePut(value = "special_stock", key = "#stockCode", cacheManager = "testManager", unless = "#result == null")
+    public WatchStockDTO saveSpecialWatchStock(String stockCode, WatchStockDTO watchStockDTO) {
+        return watchStockDTO;
+    }
+
 }

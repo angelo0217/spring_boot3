@@ -2,12 +2,11 @@ package com.example.demo.entity.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -63,4 +62,8 @@ public class StockInfoDTO {
 
     @JsonProperty("dataDate")
     private LocalDateTime dataDate;
+
+    public boolean isRise(Double realTimePrice) {
+        return (((realTimePrice - this.getClose()) / this.getClose()) > 0.09);
+    }
 }

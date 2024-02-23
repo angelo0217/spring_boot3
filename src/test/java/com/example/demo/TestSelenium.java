@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.constant.StockConst.REASON;
+import com.example.demo.utils.StockUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -45,17 +46,27 @@ public class TestSelenium {
     @Autowired
     private StockCacheService stockCacheService;
 
+    @Test
+    public void testFall(){
+        System.out.println(StockUtils.isKeepFall(stockDayInfoService, "4707", 2));
+    }
+
 
     @Test
     public void testBeforeData(){
-        var data = stockDayInfoService.getBeforeData("1449", LocalDateTime.now(), 2);
+        var data = stockDayInfoService.getBeforeData("2312", LocalDateTime.now(), 1);
         data.stream().forEach(System.out::println);
+
+        var cnt = data.stream()
+                      .filter(v -> v.getClose() < v.getOpen())
+                      .count();
+        System.out.println("================" + cnt);
     }
 
     @Test
     public void testReason() {
         var reason = StockConst.REASON.getStockReason(1500, 1400,
-                80.0, 70.0, null);
+                80.0, 70.0);
         if (!reason.equals(StockConst.REASON.NOTHING)) {
             System.out.println("1234 " + reason.getDescription());
         } else {
@@ -92,7 +103,7 @@ public class TestSelenium {
                 .lastDayVolumes(500)
                 .happenDate(LocalDateTime.now()).build();
 
-		lineNotifyService.send(watch, REASON.MAGNIFICATION_DOWN);
+		lineNotifyService.send(watch, "123");
     }
 
     @Test
