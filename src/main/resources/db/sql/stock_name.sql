@@ -1,0 +1,7 @@
+CREATE TABLE stock_name
+(
+    id INT NOT NULL AUTO_INCREMENT,
+    stockCode VARCHAR(255),
+    stockName VARCHAR(255),
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

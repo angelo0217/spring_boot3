@@ -4,10 +4,10 @@ import com.example.demo.constant.StockConst;
 import com.example.demo.entity.dto.StockInfoDTO;
 import com.example.demo.entity.dto.StockSingleInfoDTO;
 import com.example.demo.entity.dto.WatchStockDTO;
-import com.example.demo.service.LineNotifyService;
-import com.example.demo.service.StockCacheService;
-import com.example.demo.service.StockDayInfoService;
-import com.example.demo.service.StockSinglyService;
+import com.example.demo.service.stock.LineNotifyService;
+import com.example.demo.service.stock.StockCacheService;
+import com.example.demo.service.db.StockDayInfoService;
+import com.example.demo.service.stock.StockInfoService;
 import com.example.demo.utils.StockUtils;
 import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
@@ -22,35 +22,39 @@ public class CalculateStockOpenTask implements Runnable {
     private final StockDayInfoService stockDayInfoService;
     private final LineNotifyService lineNotifyService;
     private final StockCacheService stockCacheService;
-    private final StockSinglyService stockSinglyService;
+    private final StockInfoService stockInfoService;
 
     public CalculateStockOpenTask(
             StockDayInfoService stockDayInfoService,
             LineNotifyService lineNotifyService,
             StockCacheService stockCacheService,
-            StockSinglyService stockSinglyService
+            StockInfoService stockInfoService
     ) {
         this.stockDayInfoService = stockDayInfoService;
         this.stockCacheService = stockCacheService;
         this.lineNotifyService = lineNotifyService;
-        this.stockSinglyService = stockSinglyService;
+        this.stockInfoService = stockInfoService;
     }
 
     public void callSingleStock(StockInfoDTO stockInfoDTO) {
 
         try {
-            StockSingleInfoDTO info = stockSinglyService.getStockInfo(stockInfoDTO.getStockCode());
+            StockSingleInfoDTO info = stockInfoService.getStockInfo(stockInfoDTO.getStockCode());
             if (info != null) {
-                if (!StockUtils.isKeepFall(stockDayInfoService, stockInfoDTO.getStockCode(), 2)) {
-                    return;
-                }
-
                 if (info.getRealTimePrice() != null) {
                     if (stockInfoDTO.isRise(info.getRealTimePrice())) {
                         return;
                     }
+
+                    var ma5 = StockUtils.getMaDayMoney(stockDayInfoService, stockInfoDTO.getStockCode(),
+                            LocalDateTime.now(), 5
+                    );
+                    if (stockInfoDTO.getClose() > ma5)
+                        return;
+
                     var watch =
                             WatchStockDTO.builder().stockCode(stockInfoDTO.getStockCode())
+                                         .stockName(stockInfoDTO.getStockName())
                                          .detectVolumes(info.getRealTimeVolume())
                                          .detectMoney(info.getRealTimePrice()).lastDateMoney(stockInfoDTO.getClose())
                                          .lastDayVolumes(stockInfoDTO.getVolume())
@@ -62,8 +66,9 @@ public class CalculateStockOpenTask implements Runnable {
                         if (cacheInfo.getDetectMoney() < watch.getDetectMoney()
                                 && watch.getDetectMoney() > stockInfoDTO.getClose()
                                 && (watch.getDetectMoney() - stockInfoDTO.getClose()) / stockInfoDTO.getClose() > 0.02
+                                && watch.getDetectVolumes() > 300
                         ) {
-                            lineNotifyService.send(watch, "開盤 900-930，前2日跌，目前持續漲幅");
+                            lineNotifyService.send(watch, "開盤 900-930，前3日跌，目前持續漲幅");
                         }
                     }
                     stockCacheService.saveSpecialWatchStock(stockInfoDTO.getStockCode(), watch);
@@ -83,6 +88,7 @@ public class CalculateStockOpenTask implements Runnable {
         infos.stream().filter(v -> !v.getStockCode().contains("&"))
              .filter(v -> StockUtils.isEStock(v.getStockCode()))
              .filter(v -> v.getClose() < v.getOpen())
+             .filter(v -> StockUtils.isKeepFall(stockDayInfoService, v.getStockCode(), 3))
              .forEach(this::callSingleStock);
     }
 }

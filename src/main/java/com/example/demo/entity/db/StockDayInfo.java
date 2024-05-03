@@ -28,6 +28,7 @@ public class StockDayInfo {
     private Double previousClose;
     private Integer previousVolume;
     private Double previousMillionAmount;
+    private String stockName;
     @Column(name = "dataDate", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime dataDate;
 }

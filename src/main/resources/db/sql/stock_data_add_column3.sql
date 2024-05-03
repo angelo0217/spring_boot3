@@ -1,0 +1,1 @@
+ALTER TABLE stock_data ADD COLUMN stockName VARCHAR(200) default "";

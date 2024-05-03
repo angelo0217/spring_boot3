@@ -63,6 +63,9 @@ public class StockInfoDTO {
     @JsonProperty("dataDate")
     private LocalDateTime dataDate;
 
+    @JsonProperty("stockName")
+    private String stockName;
+
     public boolean isRise(Double realTimePrice) {
         return (((realTimePrice - this.getClose()) / this.getClose()) > 0.09);
     }

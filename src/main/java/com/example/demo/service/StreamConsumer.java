@@ -18,7 +18,7 @@ public class StreamConsumer {
 
     @Bean
     Consumer<User> msg() {
-        log.error("init stream consumer");
+        log.info("init stream consumer");
         return msg -> {
             log.info("stream consumer message => {}", msg);
             dispatchMsgService.dispatchMessage(msg);
@@ -27,7 +27,7 @@ public class StreamConsumer {
 
     @Bean
     Consumer<User> test() {
-        log.error("init test stream consumer");
+        log.info("init test stream consumer");
         return msg -> {
             log.info("stream test consumer message => {}", msg);
             dispatchMsgService.dispatchMessage(msg);

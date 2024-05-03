@@ -1,33 +1,39 @@
 package com.example.demo;
 
-import com.example.demo.constant.StockConst.REASON;
-import com.example.demo.utils.StockUtils;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import com.example.demo.service.StockCacheService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestTemplate;
-
 import com.example.demo.constant.StockConst;
 import com.example.demo.entity.dto.StockInfoDTO;
 import com.example.demo.entity.dto.StockSingleInfoDTO;
 import com.example.demo.entity.dto.WatchStockDTO;
-import com.example.demo.service.LineNotifyService;
-import com.example.demo.service.StockDayInfoService;
-import com.example.demo.service.WatchStockService;
+import com.example.demo.respository.StockDayInfoRepository;
+import com.example.demo.service.stock.LineNotifyService;
+import com.example.demo.service.stock.StockCacheService;
+import com.example.demo.service.db.StockDayInfoService;
+import com.example.demo.service.stock.StockInfoService;
+import com.example.demo.service.db.WatchStockService;
+import com.example.demo.service.task.CalculateSpecialTask;
+import com.example.demo.service.task.CalculateWantgooDataTask;
+import com.example.demo.service.task.CalculateStockCloseTask;
 import com.example.demo.utils.JsonUtil;
+import com.example.demo.utils.StockUtils;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
 
 
 @RunWith(SpringRunner.class)
@@ -40,20 +46,139 @@ public class TestSelenium {
     @Autowired
     private WatchStockService watchStockService;
 
-	@Autowired
-	private LineNotifyService lineNotifyService;
+    @Autowired
+    private LineNotifyService lineNotifyService;
 
     @Autowired
     private StockCacheService stockCacheService;
 
+    @Autowired
+    private StockInfoService stockInfoService;
+
+    @Autowired
+    private BeanFactory beanFactory;
+
+    @Autowired
+    private StockDayInfoRepository stockDayInfoRepository;
+
+//
+//    @Test
+//    public void getMainTrendData(){
+//        var ary = stockInfoService.getMainTrendData("2020");
+//        if (ary.size() > 2){
+//            var today = ary.get(0);
+//            var yesToday = ary.get(1);
+//
+//            System.out.println(today);
+//            System.out.println(yesToday);
+//        }
+//    }
+
     @Test
-    public void testFall(){
+    public void getBeforeDate(){
+        var dataDate = stockDayInfoService.getMaxDataDate();
+        var infos = stockDayInfoService.getMatchInfoByDataDate(StockConst.B_MIN_CLOSE,
+                StockConst.B_MAX_CLOSE, dataDate
+        );
+
+        for (StockInfoDTO d: infos)
+            System.out.println(d.getStockName());
+    }
+
+    @Test
+    public void getPushLocation() {
+        var data = stockDayInfoService.getBeforeData("3322", LocalDateTime.now(), 60);
+        var map = new HashMap<Double, List<LocalDateTime>>();
+        for (StockInfoDTO info : data) {
+            double scale = Math.pow(10, 1);
+            double point = Math.ceil(info.getHigh() * scale) / scale;
+            if (map.get(point) == null) {
+                map.put(point, new ArrayList<>());
+            }
+            var ary = map.get(point);
+            ary.add(info.getDataDate());
+        }
+        for (Map.Entry<Double, List<LocalDateTime>> entry : map.entrySet()) {
+            Double key = entry.getKey();
+            List<LocalDateTime> dates = entry.getValue();
+            System.out.println("Key: " + key);
+            for (LocalDateTime date : dates) {
+                System.out.println("Date: " + date);
+            }
+        }
+        Double maxKey = null;
+        int maxSize = 0;
+        for (Map.Entry<Double, List<LocalDateTime>> entry : map.entrySet()) {
+            Double key = entry.getKey();
+            List<LocalDateTime> list = entry.getValue();
+            int size = list.size();
+            if (maxKey == null || size > maxSize) {
+                maxKey = key;
+                maxSize = size;
+            }
+        }
+
+        System.out.println("Key with maximum list size: " + maxKey);
+        System.out.println("Maximum list size: " + maxSize);
+    }
+
+    @Test
+    public void runClose() {
+        var calculateCloseTask = beanFactory.getBean(
+                CalculateStockCloseTask.class, stockDayInfoService, lineNotifyService, stockInfoService
+        );
+        calculateCloseTask.run();
+    }
+
+
+    @Test
+    public void runDali() {
+        var calculateCloseTask = beanFactory.getBean(
+                CalculateWantgooDataTask.class, stockDayInfoService, lineNotifyService, stockInfoService
+        );
+        calculateCloseTask.run();
+    }
+
+    @Test
+    public void runSpecial() {
+        var calculateSpecialTask = beanFactory.getBean(
+                CalculateSpecialTask.class, stockDayInfoService, lineNotifyService, stockInfoService
+        );
+        calculateSpecialTask.run();
+    }
+
+    @Test
+    public void testMd5() {
+//        var day = stockDayInfoService.getMaxDataDate();
+//        var yesterday = day.minusDays(1);
+
+//        LocalDateTime now = LocalDateTime.now();
+//        DayOfWeek today = now.getDayOfWeek();
+//        LocalDateTime lastSaturday;
+//        if (today == DayOfWeek.SATURDAY) {
+//            lastSaturday = now.minusDays(7);
+//        } else {
+//            int daysToSubtract = today.getValue() % 7 + 1; // 计算需要向前调整的天数
+//            lastSaturday = now.minusDays(daysToSubtract);
+//        }
+//        System.out.println(lastSaturday);
+
+//        var infos = stockDayInfoService.getBeforeData("6218", day, 5);
+
+//        System.out.println(StockUtils.isOverMd5twice(stockDayInfoService, "6218", 35.0));
+
+        var dd = String.format("aaaa", 1, 2, 3);
+        System.out.println(dd);
+    }
+
+    @Test
+    public void testFall() {
         System.out.println(StockUtils.isKeepFall(stockDayInfoService, "4707", 2));
     }
 
 
     @Test
-    public void testBeforeData(){
+    public void testBeforeData() {
         var data = stockDayInfoService.getBeforeData("2312", LocalDateTime.now(), 1);
         data.stream().forEach(System.out::println);
 
@@ -65,13 +190,13 @@ public class TestSelenium {
 
     @Test
     public void testReason() {
-        var reason = StockConst.REASON.getStockReason(1500, 1400,
-                80.0, 70.0);
-        if (!reason.equals(StockConst.REASON.NOTHING)) {
-            System.out.println("1234 " + reason.getDescription());
-        } else {
-            System.out.println("1234");
-        }
+//        var reason = StockConst.REASON.getStockReason(1500, 1400,
+//                80.0, 70.0);
+//        if (!reason.equals(StockConst.REASON.NOTHING)) {
+//            System.out.println("1234 " + reason.getDescription());
+//        } else {
+//            System.out.println("1234");
+//        }
     }
 
     @Test
@@ -97,11 +222,12 @@ public class TestSelenium {
     @Test
     public void writeWatch() {
         var watch = WatchStockDTO.builder()
-                .stockCode("測試")
-                .detectVolumes(1500)
-				.detectMoney(14.1).lastDateMoney(14.7)
-                .lastDayVolumes(500)
-                .happenDate(LocalDateTime.now()).build();
+                                 .stockName("Tet")
+                                 .stockCode("8092")
+                                 .detectVolumes(1500)
+                                 .detectMoney(14.1).lastDateMoney(14.7)
+                                 .lastDayVolumes(500)
+                                 .happenDate(LocalDateTime.now()).build();
 
 		lineNotifyService.send(watch, "123");
     }
@@ -150,7 +276,7 @@ public class TestSelenium {
     @Test
     public void testRun() {
 //        https://googlechromelabs.github.io/chrome-for-testing/#stable
-        System.setProperty("webdriver.chrome.driver", "src\\main\\resources\\dirver\\chromedriver.exe");
+        System.setProperty("webdriver.chrome.driver", "src\\main\\resources\\dirver\\chromedriver_bak.exe");
 
         // 初始化 Chrome 瀏覽器
         WebDriver driver = new ChromeDriver();
@@ -191,6 +317,40 @@ public class TestSelenium {
         } finally {
             // 關閉瀏覽器
             driver.quit();
+        }
+    }
+
+    @Test
+    public void runSpecialLogic() {
+        var code = "5348";
+        var now = LocalDateTime.now();
+
+        now = now.minusDays(7);
+        System.out.println(now);
+        var lastDayDataList = stockDayInfoService.getBeforeData(code, now,
+                10
+        );
+
+        for(int i = 0; i < lastDayDataList.size(); i++){
+            StockInfoDTO d = lastDayDataList.get(i);
+            System.out.println(d);
+            if (i < 4) {
+                if (d.getClose() > d.getOpen())
+                    throw new RuntimeException("not match");
+            } else {
+                if (i == lastDayDataList.size() - 1)
+                    throw new RuntimeException("not match 1");
+
+                var before = lastDayDataList.get(i + 1);
+                if (d.getClose() > before.getClose()){
+                    System.out.println("b: " + before);
+                    System.out.println("==========================ok");
+                    break;
+                } else
+                    if (i > 5)
+                        throw new RuntimeException("not match 2");
+            }
+
         }
     }
 }

@@ -19,4 +19,10 @@
     <changeSet id="5" author="dean">
         <sqlFile path="classpath:db/sql/stock_data_add_column2.sql" relativeToChangelogFile="false" />
     </changeSet>
+    <changeSet id="6" author="dean">
+        <sqlFile path="classpath:db/sql/stock_data_add_column3.sql" relativeToChangelogFile="false" />
+    </changeSet>
+    <changeSet id="7" author="dean">
+        <sqlFile path="classpath:db/sql/stock_name.sql" relativeToChangelogFile="false" />
+    </changeSet>
 </databaseChangeLog>

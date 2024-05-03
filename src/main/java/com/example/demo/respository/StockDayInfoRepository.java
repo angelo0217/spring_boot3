@@ -13,7 +13,9 @@ public interface StockDayInfoRepository extends JpaRepository<StockDayInfo, Inte
     @Query("SELECT COUNT(e.id) FROM StockDayInfo e WHERE DATE_FORMAT(e.dataDate, '%Y-%m-%d') = :dataDate")
     long countByDataDate(String dataDate);
 
-    List<StockDayInfo> getAllByCloseGreaterThanAndCloseLessThanAndTradeDateOrderByTradeDateDesc(int greater, int less, Long tradeDate);
+    List<StockDayInfo> getAllByCloseGreaterThanAndCloseLessThanAndTradeDateOrderByTradeDateDesc(
+            int greater, int less, Long tradeDate
+    );
 
     @Query("SELECT MAX(e.tradeDate) FROM StockDayInfo e")
     Long findMaxTraceDate();
@@ -22,15 +24,29 @@ public interface StockDayInfoRepository extends JpaRepository<StockDayInfo, Inte
     LocalDateTime findMaxDataDate();
 
 
-    @Query("SELECT s FROM StockDayInfo s WHERE s.close > :greater AND s.close < :less AND DATE_FORMAT(s.dataDate, '%Y-%m-%d') = :dataDate ORDER BY s.dataDate DESC")
+    @Query(value = "SELECT s.id, s.stockCode, s.tradeDate, s.time, s.flat, s.floor, s.ceil, s.open, s.high, s.low, s"
+            + ".close, s.volume, s.millionAmount, s.previousClose, s.previousVolume, s.previousMillionAmount, sn.stockName as stockName, s.dataDate "
+            + " FROM stock_data s LEFT JOIN stock_name sn ON s.stockCode = sn.stockCode"
+            + " WHERE s.close > :less AND s.close < :greater AND DATE_FORMAT(s.dataDate, '%Y-%m-%d') = :dataDate ORDER BY s.dataDate DESC",
+            nativeQuery = true)
     List<StockDayInfo> findAllByCloseGreaterThanAndCloseLessThanAndTradeDateOrderByTradeDateDesc(
-            @Param("greater") int greater, @Param("less") int less, @Param("dataDate") String dataDate
+            @Param("less") int less, @Param("greater") int greater, @Param("dataDate") String dataDate
     );
 
-    @Query("SELECT s FROM StockDayInfo s WHERE s.stockCode = :stockCode AND DATE_FORMAT(s.dataDate, '%Y-%m-%d') < :dataDate ORDER BY s.dataDate DESC limit :limit")
+    @Query(value =
+            "SELECT s.id, s.stockCode, s.tradeDate, s.time, s.flat, s.floor, s.ceil, s.open, s.high, s.low, s.close, s.volume, s.millionAmount, s.previousClose, s.previousVolume, s.previousMillionAmount, sn.stockName as stockName, s.dataDate "
+                    + "FROM stock_data s LEFT JOIN stock_name sn ON s.stockCode = sn.stockCode "
+                    + "WHERE s.stockCode = :stockCode AND DATE_FORMAT(s.dataDate, '%Y-%m-%d') < :dataDate ORDER BY s.dataDate DESC LIMIT :limit",
+            nativeQuery = true)
     List<StockDayInfo> findBeforeData(
             @Param("stockCode") String stockCode, @Param("dataDate") String dataDate,
             @Param("limit") int limit
     );
+
+//    @Query(value ="select a.stockCode from ("
+//            + "select stockCode, count(id) as cnt from stock_data sd  group by stockCode \n"
+//            + ")as a where a.cnt = 1",  nativeQuery = true)
+    @Query(value ="select stockCode from stock_data group by stockCode ",  nativeQuery = true)
+    List<String> findStocksWithOneRecord();
 
 }

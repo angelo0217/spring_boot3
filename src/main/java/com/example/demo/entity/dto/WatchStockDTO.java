@@ -39,4 +39,7 @@ public class WatchStockDTO implements Serializable {
 
     @JsonProperty("is_rise")
     private boolean is_rise;
+
+    @JsonProperty("stockName")
+    private String stockName;
 }

@@ -2,6 +2,8 @@ package com.example.demo;
 
 import com.example.demo.entity.User;
 import com.example.demo.utils.JsonUtil;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,8 +22,23 @@ public class TestJava {
 
     @Test
     public void testObj() throws Exception {
-        var url = "/demo/chat_ws/1234";
-        String[] splitPath = url.split("/");
-        System.out.println(splitPath);
+        // 获取当前的日期和时间
+        LocalDateTime now = LocalDateTime.now();
+
+        // 获取年、月、日
+        int year = now.getYear();
+        int month = now.getMonthValue();
+        int day = now.getDayOfMonth();
+
+        // 打印结果
+        System.out.println("年: " + year);
+        System.out.println("月: " + month);
+        System.out.println("日: " + day);
+
+        Instant timestamp = Instant.now();
+
+        // 打印结果
+        System.out.println("当前时间戳（毫秒）: " + timestamp.toEpochMilli());
+        System.out.println("当前时间戳（秒）: " + timestamp.getEpochSecond());
     }
 }
