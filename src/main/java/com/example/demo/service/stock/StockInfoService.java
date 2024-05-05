@@ -227,7 +227,10 @@ public class StockInfoService {
     public List<StockInfoDTO> getStockInfoWithGoogleDriver() {
 //        https://googlechromelabs.github.io/chrome-for-testing/
         System.setProperty("webdriver.chrome.driver", StockConst.CHROME_DRIVER);
-        WebDriver driver = new ChromeDriver();
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        options.setBinary("D:\\chrome-win64\\chrome.exe");
+        WebDriver driver = new ChromeDriver(options);
 //        System.setProperty("webdriver.gecko.driver", GECKO_DRIVER);
 //        WebDriver driver = new FirefoxDriver();
 
@@ -266,6 +269,7 @@ public class StockInfoService {
         System.setProperty("webdriver.chrome.driver", StockConst.CHROME_DRIVER);
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--disable-blink-features=AutomationControlled");
+        options.setBinary("D:\\chrome-win64\\chrome.exe");
         WebDriver driver = new ChromeDriver(options);
         // 使用JavascriptExecutor在瀏覽器中執行API請求，並取得結果
         JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;

@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -54,9 +55,11 @@ public class TestWantgooStock {
     @Test
     public void getStockName() {
         System.setProperty("webdriver.chrome.driver", StockConst.CHROME_DRIVER);
-
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        options.setBinary("D:\\chrome-win64\\chrome.exe");
         // 初始化 Chrome 瀏覽器
-        WebDriver driver = new ChromeDriver();
+        WebDriver driver = new ChromeDriver(options);
 
         try {
             // 打開目標網頁
@@ -108,9 +111,11 @@ public class TestWantgooStock {
 //    @Test
     public void patchData(String stockCode) {
         System.setProperty("webdriver.chrome.driver", StockConst.CHROME_DRIVER);
-
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        options.setBinary("D:\\chrome-win64\\chrome.exe");
         // 初始化 Chrome 瀏覽器
-        WebDriver driver = new ChromeDriver();
+        WebDriver driver = new ChromeDriver(options);
 
         try {
             // 打開目標網頁 https://www.wantgoo.com/stock/8054/technical-chart

@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -277,9 +278,11 @@ public class TestSelenium {
     public void testRun() {
 //        https://googlechromelabs.github.io/chrome-for-testing/#stable
         System.setProperty("webdriver.chrome.driver", "src\\main\\resources\\dirver\\chromedriver_bak.exe");
-
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        options.setBinary("D:\\chrome-win64\\chrome.exe");
         // 初始化 Chrome 瀏覽器
-        WebDriver driver = new ChromeDriver();
+        WebDriver driver = new ChromeDriver(options);
 
         try {
             // 打開目標網頁
