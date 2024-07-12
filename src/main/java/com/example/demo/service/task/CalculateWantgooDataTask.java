@@ -58,7 +58,7 @@ public class CalculateWantgooDataTask implements Runnable {
                                            var diff = Math.abs(v.getClose() - average);
                                            double percentage = diff / v.getClose();
                                            System.out.println("percentage >>>>>>" + percentage);
-                                           return percentage < 0.02;
+                                           return percentage < 0.03;
                                        })
                                        .mapToDouble(StockMainTrendDataDTO::getClose)
                                        .toArray();
@@ -192,9 +192,9 @@ public class CalculateWantgooDataTask implements Runnable {
             var mainTrendAry = Arrays.asList(wantgoo.getMainTrendData());
 
             var role = this.getAgentMainPowerReasonUp(mainTrendAry);
-            if (role == null) {
-                role = this.getAgentMainPowerReason(todayStock, lastDayDataList, mainTrendAry);
-            }
+//            if (role == null) {
+//                role = this.getAgentMainPowerReason(todayStock, lastDayDataList, mainTrendAry);
+//            }
             if (role != null) {
 
                 lineNotifyService.sendMainTrendData(watch, role);
@@ -217,7 +217,8 @@ public class CalculateWantgooDataTask implements Runnable {
              .filter(v -> StockUtils.isEStock(v.getStockCode()))
              .filter(v -> v.getVolume() > 1000)
 //             .filter(v -> v.getClose() < v.getOpen())
-           .filter(v -> v.getStockCode().equals("0056"))
+//           .filter(v -> v.getStockCode().equals("0056"))
+                .filter(v -> !stockInfoService.containsETFCode(v.getStockCode()))
              .forEach(this::callSingleStock);
 //                .forEach(System.out::println);
     }

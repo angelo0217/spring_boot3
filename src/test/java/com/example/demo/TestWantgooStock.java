@@ -114,12 +114,11 @@ public class TestWantgooStock {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--disable-blink-features=AutomationControlled");
         options.setBinary("D:\\chrome-win64\\chrome.exe");
-        // 初始化 Chrome 瀏覽器
         WebDriver driver = new ChromeDriver(options);
 
         try {
             // 打開目標網頁 https://www.wantgoo.com/stock/8054/technical-chart
-            driver.get("https://www.wantgoo.com/investrue/"+stockCode+"/historical-daily-candlesticks?before=1711987200000&top"
+            driver.get("https://www.wantgoo.com/investrue/"+stockCode+"/historical-daily-candlesticks?before=1718294400000&top"
                     + "=60");
             String pageSource = driver.getPageSource();
             String regex = "<(.*?)>";
@@ -136,8 +135,10 @@ public class TestWantgooStock {
                         v.setStockCode(stockCode);
                         return v;
                     }).collect(Collectors.toList());
-            stockDayInfoService.create(newStream.get(0));
-//            stockDayInfoService.saveAll(newStream);
+//            System.out.println(newStream.get(0).getDataDate());
+//            System.out.println(newStream.get(newStream.size() - 1).getDataDate());
+//            stockDayInfoService.create(newStream.get(0));
+            stockDayInfoService.saveAll(newStream);
 
         } catch (Exception ex) {
             System.out.println(ex);
@@ -145,7 +146,7 @@ public class TestWantgooStock {
             // 關閉瀏覽器
             driver.quit();
             try {
-                Thread.sleep(3000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

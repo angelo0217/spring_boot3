@@ -10,9 +10,11 @@ import com.example.demo.service.stock.StockCacheService;
 import com.example.demo.service.db.StockDayInfoService;
 import com.example.demo.service.stock.StockInfoService;
 import com.example.demo.service.db.WatchStockService;
+import com.example.demo.service.task.CalculateRSITask;
 import com.example.demo.service.task.CalculateSpecialTask;
 import com.example.demo.service.task.CalculateWantgooDataTask;
 import com.example.demo.service.task.CalculateStockCloseTask;
+import com.example.demo.service.task.StockInfoAPITask;
 import com.example.demo.utils.JsonUtil;
 import com.example.demo.utils.StockUtils;
 import java.time.LocalDateTime;
@@ -124,11 +126,11 @@ public class TestSelenium {
     }
 
     @Test
-    public void runClose() {
-        var calculateCloseTask = beanFactory.getBean(
-                CalculateStockCloseTask.class, stockDayInfoService, lineNotifyService, stockInfoService
+    public void runStockInfo() {
+        var stockInfoAPITask = beanFactory.getBean(
+                StockInfoAPITask.class, stockDayInfoService, stockInfoService
         );
-        calculateCloseTask.run();
+        stockInfoAPITask.run();
     }
 
 
@@ -146,6 +148,13 @@ public class TestSelenium {
                 CalculateSpecialTask.class, stockDayInfoService, lineNotifyService, stockInfoService
         );
         calculateSpecialTask.run();
+    }
+    @Test
+    public void runRsi() {
+        var calculateRsiTask = beanFactory.getBean(
+                CalculateRSITask.class, stockDayInfoService, lineNotifyService, stockInfoService
+        );
+        calculateRsiTask.run();
     }
 
     @Test
@@ -325,35 +334,102 @@ public class TestSelenium {
 
     @Test
     public void runSpecialLogic() {
-        var code = "5348";
+        var code = "3498";
         var now = LocalDateTime.now();
 
         now = now.minusDays(7);
         System.out.println(now);
+
+        var ma5 = StockUtils.getMaDayMoney(stockDayInfoService, code,
+                now, 5
+        );
+        var ma10 = StockUtils.getMaDayMoney(stockDayInfoService, code,
+                now, 10
+        );
+        System.out.println("ma5: " + ma5);
+        System.out.println("ma10: " + ma10);
+        if(ma5 >= ma10) {
+            System.out.println("not match 1");
+            return;
+        }
+
+        System.out.println("++++"+code + ", ma5: " + ma5 + ", ma10: " + ma10 + ","  );
+        now = now.plusDays(1);
         var lastDayDataList = stockDayInfoService.getBeforeData(code, now,
-                10
+                15
         );
 
-        for(int i = 0; i < lastDayDataList.size(); i++){
+        var stockInfoDTO = lastDayDataList.get(0);
+        System.out.println(stockInfoDTO);
+        for(int i = 1; i < lastDayDataList.size(); i++){
             StockInfoDTO d = lastDayDataList.get(i);
             System.out.println(d);
-            if (i < 4) {
-                if (d.getClose() > d.getOpen())
-                    throw new RuntimeException("not match");
+            if (i <= 4) {
+                if (d.getClose() > d.getOpen()){
+                    System.out.println("not match 2");
+                    return;
+                }
             } else {
-                if (i == lastDayDataList.size() - 1)
-                    throw new RuntimeException("not match 1");
+                if (i == lastDayDataList.size() - 1){
+                    System.out.println("not match 3");
+                    return;
+                }
+                if (d.getClose() < d.getOpen())
+                    continue;
+                else if (d.getClose() == d.getOpen()){
+                    System.out.println("not match 4");
+                    return;
+                }
+                else {
+                    var before = lastDayDataList.get(i + 1);
+                    System.out.println(">.." + d.getClose());
+                    System.out.println(">.." + before.getClose());
+                    System.out.println((d.getClose() - stockInfoDTO.getClose()) / d.getClose());
+                    if (d.getClose() > before.getClose() && ((d.getClose() - stockInfoDTO.getClose()) / d.getClose() <= 0.05)){
+                        ma5 = StockUtils.getMaDayMoney(stockDayInfoService, stockInfoDTO.getStockCode(),
+                                d.getDataDate(), 5
+                        );
+                        ma10 = StockUtils.getMaDayMoney(stockDayInfoService, stockInfoDTO.getStockCode(),
+                                d.getDataDate(), 10
+                        );
+                        System.out.println("ma5: "+ ma5);
+                        System.out.println("ma10: "+ ma10);
+                        if (ma5 < ma10){
+                            System.out.println("====================ok");
+                        return;
+                        }
+                        else{
+                            System.out.println("not match 5");
+                            return;
+                        }
 
-                var before = lastDayDataList.get(i + 1);
-                if (d.getClose() > before.getClose()){
-                    System.out.println("b: " + before);
-                    System.out.println("==========================ok");
-                    break;
-                } else
-                    if (i > 5)
-                        throw new RuntimeException("not match 2");
+                    } else {
+                        System.out.println("not match 6");
+                        return;
+                    }
+                }
             }
-
         }
+        System.out.println("not match 7");
+    }
+
+    @Test
+    public void runSpecialLogic2() {
+        var code = "2365";
+        var now = LocalDateTime.now();
+
+        now = now.minusDays(15);
+
+        System.out.println(now);
+        var lastDayDataList = stockDayInfoService.getBeforeData(code, now,
+                2
+        );
+//        日期早到晚 跌漲跌跌漲 ，需反向判斷 漲跌跌漲跌
+        var stockInfoDTO = lastDayDataList.get(0);
+        System.out.println(">>" + stockInfoDTO);
+        var calculateSpecialTask = beanFactory.getBean(
+                CalculateSpecialTask.class, stockDayInfoService, lineNotifyService, stockInfoService
+        );
+        System.out.println(calculateSpecialTask.matchSpecialLogic(stockInfoDTO));
     }
 }

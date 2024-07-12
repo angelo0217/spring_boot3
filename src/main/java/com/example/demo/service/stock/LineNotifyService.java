@@ -53,6 +53,14 @@ public class LineNotifyService {
         );
         this.sendMsg(message, watch.getStockCode());
     }
+
+    public void sendRsiData(WatchStockDTO watch, String reason) {
+        String message = String.format(
+                "\n 代號: %s - %s \n 現在金額: %.2f \n 交易量: %d \n 可能漲 \n 原因: %s\n",
+                watch.getStockCode(), watch.getStockName(), watch.getDetectMoney(), watch.getDetectVolumes(), reason
+        );
+        this.sendMsg(message, watch.getStockCode());
+    }
     public void sendReasonablePrice(WatchStockDTO watch, Double reasonablePrice, Double lowerReasonablePrice, int basePer) {
 //        System.out.println(watch.getStockCode() + "," + reason);
         String message = String.format(
@@ -66,8 +74,8 @@ public class LineNotifyService {
 
     public void sendMsg(String message, String stockCode){
         String url = "https://notify-api.line.me/api/notify";
-        message = message + "https://www.wantgoo.com/stock/" +stockCode+ "/major-investors/main-trend";
-        String token = "8ELnpvmW5yaxMuTpCXq3NIuTMChs4AfHUjm1QOMUiCG";
+        message = message + "https://www.wantgoo.com/stock/" +stockCode+ "/technical-chart";
+        String token = "8ELnpvmW5yabcxMuTpCXq3NIuTMChs4AfHUjm1QOMUiCG";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);

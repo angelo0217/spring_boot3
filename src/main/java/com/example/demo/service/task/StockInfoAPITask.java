@@ -35,8 +35,8 @@ public class StockInfoAPITask implements Runnable {
         List<StockInfoDTO> stockInfoDTOS = this.stockInfoService.getStockInfoWithGoogleDriver();
         var newList = stockInfoDTOS.stream()
                                    .filter(v -> StockUtils.isEStock(v.getStockCode()))
-                                   .filter(e -> e.getClose() > StockConst.MIN_CLOSE
-                                           && e.getClose() <= StockConst.MAX_CLOSE)
+//                                   .filter(e -> e.getClose() > StockConst.MIN_CLOSE
+//                                           && e.getClose() <= StockConst.MAX_CLOSE)
                                    .collect(Collectors.toList());
         if (tradeDate != stockInfoDTOS.get(0).getTradeDate()) {
             this.stockDayInfoService.saveAll( newList);

@@ -41,7 +41,7 @@ public class StockInfoService {
             "0057",
             "0061",
             "006203",
-            "006205(新臺幣)<br>00625K(人民幣)",
+            "006205",
             "006204",
             "006206",
             "006207",
@@ -50,7 +50,7 @@ public class StockInfoService {
             "00632R",
             "00633L",
             "00634R",
-            "00636(新臺幣)<br>00636K(美元)",
+            "00636",
             "00635U",
             "00637L",
             "00638R",
@@ -59,7 +59,7 @@ public class StockInfoService {
             "00640L",
             "00641R",
             "00645",
-            "00643(新臺幣)<br>00643K(人民幣)",
+            "00643",
             "00646",
             "00647L",
             "00648R",
@@ -70,7 +70,7 @@ public class StockInfoService {
             "00652",
             "00653L",
             "00654R",
-            "00657(新臺幣)<br>00657K(美元)",
+            "00657",
             "00660",
             "00661",
             "00662",
@@ -83,7 +83,7 @@ public class StockInfoService {
             "00673R",
             "00674R",
             "00669R",
-            "00668(新臺幣)<br>00668K(美元)",
+            "00668",
             "00678",
             "00680L",
             "00681R",
@@ -244,6 +244,7 @@ public class StockInfoService {
             Matcher matcher = pattern.matcher(pageSource);
             String result = matcher.replaceAll("");
             StockInfoDTO[] stockInfoDTOS = JsonUtil.jsonToObject(result, StockInfoDTO[].class);
+            System.out.println(stockInfoDTOS);
             return Arrays.asList(stockInfoDTOS);
         } finally {
             // 關閉瀏覽器
