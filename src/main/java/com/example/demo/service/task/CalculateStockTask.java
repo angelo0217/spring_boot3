@@ -12,6 +12,7 @@ import com.example.demo.service.stock.StockInfoService;
 import com.example.demo.service.db.WatchStockService;
 import com.example.demo.utils.StockUtils;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -41,63 +42,52 @@ public class CalculateStockTask implements Runnable {
         this.stockInfoService = stockInfoService;
     }
 
-    public boolean willToRise(StockInfoDTO stockInfoDTO, StockSingleInfoDTO info) {
-        if ((info.getRealTimePrice() - stockInfoDTO.getClose()) / stockInfoDTO.getClose() < 0.01) {
-            return false;
-        }
-
-        var day = LocalDateTime.now();
-        var ma5 = StockUtils.getMaDayMoney(stockDayInfoService, stockInfoDTO.getStockCode(),
-                day, 5
-        );
-        Double ma20;
-//        var ma20 = StockUtils.getMaDayMoney(stockDayInfoService, stockInfoDTO.getStockCode(),
-//                day, 20
-//        );
-
-        if (info.getRealTimePrice() < ma5) {
-            return false;
-        }
-
-        for (int i = 0; i <= 2; i++) {
-            var infos = stockDayInfoService.getBeforeData(stockInfoDTO.getStockCode(), day, 1);
-            var data = infos.get(0);
-            ma5 = StockUtils.getMaDayMoney(stockDayInfoService, stockInfoDTO.getStockCode(),
-                    day, 5
-            );
-            ma20 = StockUtils.getMaDayMoney(stockDayInfoService, stockInfoDTO.getStockCode(),
-                    day, 20
-            );
-            if (data.getClose() > ma5 || data.getClose() > ma20) {
-                return false;
-            }
-            day = infos.get(0).getDataDate();
-        }
-        return true;
-    }
-
     public void callSingleStock(StockInfoDTO stockInfoDTO) {
 
         try {
+
             StockSingleInfoDTO info = stockInfoService.getStockInfo(stockInfoDTO.getStockCode());
             if (info == null) {
                 return;
             }
+            var lastDayDataList = stockDayInfoService.getBeforeData(stockInfoDTO.getStockCode(),
+                    LocalDateTime.now(), 5
+            );
+
+            LocalTime currentTime = LocalTime.now();
+            LocalTime elevenAm = LocalTime.of(10, 30);
+            // 比较当前时间和11:00时间
+            double baseRange = 3;
+            if (currentTime.isBefore(elevenAm)) {
+                baseRange = 1.5;
+            }
+
+            var avg = lastDayDataList.stream().mapToInt(StockInfoDTO::getVolume).average().orElse(10000);
 
             if (info.getRealTimePrice() != null) {
-                if (info.getRealTimeVolume() < StockConst.DEFAULT_VOLUMES) {
+                var cacheData = stockCacheService.getWatchStock(stockInfoDTO.getStockCode());
+                if (cacheData != null)
+                    return;
+
+                if (info.getRealTimeVolume() / avg < baseRange || lastDayDataList.get(0).getVolume() / avg > baseRange
+                        || info.getRealTimeVolume() < 2000) {
+                    return;
+                }
+                if (info.getRealTimePrice() <= stockInfoDTO.getClose() ||
+                        (info.getRealTimePrice() - stockInfoDTO.getClose()) / stockInfoDTO.getClose() > 0.06
+                ) {
                     return;
                 }
 
-                if (StockUtils.isStillRise(stockDayInfoService, stockInfoDTO.getStockCode(), 3)) {
+                var priceDeal = stockInfoService.getPriceDeal(stockInfoDTO.getStockCode(), false);
+                if(priceDeal == null || priceDeal.getDealOnAskPrice().doubleValue() / priceDeal.getDealOnBidPrice().doubleValue() < 1.1)
                     return;
-                }
-
-                log.info("code: {}, volume: {}, total v: {}, last: {}, now: {}",
+                log.info("**** code: {}, volume: {}, total v: {}, last: {}, now: {}",
                         stockInfoDTO.getStockCode(),
                         stockInfoDTO.getVolume(), info.getRealTimeVolume(), stockInfoDTO.getClose(),
                         info.getRealTimePrice()
                 );
+
                 var watch = WatchStockDTO.builder()
                                          .stockCode(stockInfoDTO.getStockCode())
                                          .stockName(stockInfoDTO.getStockName())
@@ -107,42 +97,11 @@ public class CalculateStockTask implements Runnable {
                                          .lastDayVolumes(stockInfoDTO.getVolume())
                                          .happenDate(LocalDateTime.now())
                                          .is_rise(stockInfoDTO.isRise(info.getRealTimePrice())).build();
-                var reason = REASON.NOTHING;
 
-//                if (info.getRealTimePrice() > stockInfoDTO.getClose()
-//                        && info.getRealTimePrice() > stockInfoDTO.getHigh()
-//                        && stockInfoDTO.getClose() > stockInfoDTO.getOpen()) {
-//                    reason = REASON.OVER_LAST_DAY_HIGH;
-//                } else {
+//                lineNotifyService.sendMainTrendData(watch, "交易量超過去5日平均"+baseRange+"倍，可注意是否大量買入");
+//                stockCacheService.saveWatchStock(stockInfoDTO.getStockCode(), watch);
 
-                if (willToRise(stockInfoDTO, info)) {
-                    reason = REASON.TODAY_START_OVER_MA5;
-                } else {
-                    if (
-                            StockUtils.isOverMA5logic(
-                                    stockDayInfoService, stockInfoDTO.getStockCode(), info.getRealTimePrice()
-                            ) && (info.getRealTimePrice() - stockInfoDTO.getClose()) / stockInfoDTO.getClose()
-                                    > 0.01) {
-                        reason = REASON.OVER_MA5;
-                    } else {
-                        reason = StockConst.REASON.getStockReason(
-                                info.getRealTimeVolume(),
-                                info.getRealTimePrice(),
-                                stockInfoDTO
-                        );
-                    }
-                }
-//                }
-                if (!reason.equals(StockConst.REASON.NOTHING)) {
-//                    if (reason.equals(REASON.MAGNIFICATION_UP) || reason.equals(REASON.OVER_MA5)) {
-//                        watchStockService.create(watch);
-//                    }
-                    var cache = stockCacheService.getWatchStock(stockInfoDTO.getStockCode());
-                    if (cache == null) {
-                        lineNotifyService.send(watch, reason);
-                    }
-                    stockCacheService.saveWatchStock(stockInfoDTO.getStockCode(), watch);
-                }
+                System.out.println(watch);
             }
         } catch (Exception ex) {
             log.error("{} call api error", stockInfoDTO.getStockCode(), ex);
@@ -161,10 +120,11 @@ public class CalculateStockTask implements Runnable {
     public void run() {
         var dataDate = stockDayInfoService.getMaxDataDate();
         var infos = stockDayInfoService.getMatchInfoByDataDate(StockConst.B_MIN_CLOSE,
-                StockConst.B_MAX_CLOSE, dataDate
+                30, dataDate
         );
         infos.stream().filter(v -> !v.getStockCode().contains("&"))
-             .filter(v -> StockUtils.isEStock(v.getStockCode()))
+             .filter(v -> !stockInfoService.containsETFCode(v.getStockCode()))
+//             .filter(v -> v.getStockCode().equals("1611"))
              .forEach(this::callSingleStock);
         // Flux.fromIterable(infos)
         // .filter(v -> !v.getStockCode().contains("&"))

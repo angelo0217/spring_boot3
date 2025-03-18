@@ -3,6 +3,7 @@ package com.example.demo.service.stock;
 import static com.example.demo.constant.StockConst.GECKO_DRIVER;
 
 import com.example.demo.constant.StockConst;
+import com.example.demo.entity.dto.PriceDealDTO;
 import com.example.demo.entity.dto.StockExDividendDataDTO;
 import com.example.demo.entity.dto.StockInfoDTO;
 import com.example.demo.entity.dto.StockMainTrendDataDTO;
@@ -10,6 +11,9 @@ import com.example.demo.entity.dto.StockSingleInfoDTO;
 import com.example.demo.entity.dto.StockWantgoo;
 import com.example.demo.utils.JsonUtil;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -250,6 +254,64 @@ public class StockInfoService {
             // 關閉瀏覽器
             driver.quit();
         }
+    }
+
+    public PriceDealDTO getPriceDeal(String stockCode, boolean isOutPrice) {
+        System.setProperty("webdriver.chrome.driver", StockConst.CHROME_DRIVER);
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        options.setBinary("D:\\chrome-win64\\chrome.exe");
+        WebDriver driver = new ChromeDriver(options);
+        var url = "https://www.wantgoo.com/investrue/"+stockCode+"/topfivepieces";
+        if (isOutPrice)
+            url = "https://www.wantgoo.com/investrue/"+stockCode+"/historical-topfivepieces?v="+ this.getTimeStamp();
+        try {
+            // 打開目標網頁
+            driver.get("https://www.wantgoo.com/stock/"+stockCode);
+            // 等待一段時間，確保網頁完全載入
+            try {
+//                Thread.sleep(5000); // 等待10秒
+
+                JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
+                Object priceDeal = jsExecutor.executeScript(
+                        "return fetch('"+url+"')" +
+                                ".then(response => response.json())" +
+                                ".then(data => data);");
+
+                var priceDealJson = JsonUtil.objectToJson(priceDeal);
+
+
+                return JsonUtil.jsonToObject(priceDealJson, PriceDealDTO.class);
+            } catch (Exception e) {
+            }
+            return null;
+        } finally {
+            // 關閉瀏覽器
+            driver.quit();
+        }
+    }
+
+    public long getTimeStamp(){
+        // 定義每天的時間，這裡是下午1:30
+        int hour = 13;
+        int minute = 30;
+
+        // 獲取當前日期
+        LocalDateTime now = LocalDateTime.now();
+        // 設定當前日期的時間為下午1:30
+        LocalDateTime targetTime = now.withHour(hour).withMinute(minute).withSecond(0).withNano(0);
+
+        // 獲取當前時區
+        ZoneId zoneId = ZoneId.systemDefault();
+        ZonedDateTime zonedDateTime = targetTime.atZone(zoneId);
+
+        // 轉換為Instant
+        Instant instant = zonedDateTime.toInstant();
+
+        // 獲取timestamp
+        long timestamp = instant.toEpochMilli();
+
+        return timestamp;
     }
 
     public StockWantgoo<StockExDividendDataDTO[], StockMainTrendDataDTO[]> getWantgooData(String stockCode) {

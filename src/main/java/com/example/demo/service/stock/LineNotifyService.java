@@ -75,7 +75,7 @@ public class LineNotifyService {
     public void sendMsg(String message, String stockCode){
         String url = "https://notify-api.line.me/api/notify";
         message = message + "https://www.wantgoo.com/stock/" +stockCode+ "/technical-chart";
-        String token = "8ELnpvmW5yabcxMuTpCXq3NIuTMChs4AfHUjm1QOMUiCG";
+        String token = "8ELnpvmW5yaxMuTpCXq3NIuTMChs4AfHUjm1QOMUiCG";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);

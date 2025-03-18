@@ -9,6 +9,7 @@ import com.example.demo.service.db.StockNameService;
 import com.example.demo.service.db.WatchStockService;
 import com.example.demo.service.task.CalculateRSITask;
 import com.example.demo.service.task.CalculateSpecialTask;
+import com.example.demo.service.task.CalculateStockTask;
 import com.example.demo.service.task.CalculateWantgooDataTask;
 import com.example.demo.service.task.StockInfoAPITask;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +62,7 @@ public class StartRunner implements CommandLineRunner {
 //                CalculateStockTask.class, stockDayInfoService, watchStockService, lineNotifyService, stockCacheService,
 //                stockInfoService
 //        );
-//        scheduledFutureManager.addCronJob("calculateTask", calculateTask, "0 0-59/15 9-13 ? * MON-FRI");
+//        scheduledFutureManager.addCronJob("calculateTask", calculateTask, "0 3/30 9-12 ? * MON-FRI");
 //        scheduledFutureManager.addCronJob("calculateTask",calculateTask, "0 44 16 * * ?");
 
 //        var calculateOpenTask =beanFactory.getBean(
@@ -81,15 +82,15 @@ public class StartRunner implements CommandLineRunner {
 //        );
 //        scheduledFutureManager.addCronJob("mainTrendDataTask", mainTrendDataTask, "30 30 19 ? * MON-FRI");
 
-        var specialTask = beanFactory.getBean(
-                CalculateSpecialTask.class, stockDayInfoService, lineNotifyService, stockInfoService
-        );
-        scheduledFutureManager.addCronJob("specialTask", specialTask, "30 10 20 ? * MON-FRI");
+//        var specialTask = beanFactory.getBean(
+//                CalculateSpecialTask.class, stockDayInfoService, lineNotifyService, stockInfoService
+//        );
+//        scheduledFutureManager.addCronJob("specialTask", specialTask, "30 10 20 ? * MON-FRI");
 
-        var rsiTask = beanFactory.getBean(
-                CalculateRSITask.class, stockDayInfoService, lineNotifyService, stockInfoService
-        );
-        scheduledFutureManager.addCronJob("rsiTask", rsiTask, "30 20 20 ? * MON-FRI");
+//        var rsiTask = beanFactory.getBean(
+//                CalculateRSITask.class, stockDayInfoService, lineNotifyService, stockInfoService
+//        );
+//        scheduledFutureManager.addCronJob("rsiTask", rsiTask, "30 20 20 ? * MON-FRI");
 //        scheduledFutureManager.addCronJob("mainTrendDataTask",mainTrendDataTask, "30 58 21 * * ?");
 
 //        var reasonablePrice = beanFactory.getBean(

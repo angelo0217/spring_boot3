@@ -98,7 +98,10 @@ public class CalculateSpecialTask implements Runnable {
     }
 
     public boolean matchSpecialLogic(StockInfoDTO stockInfoDTO) {
-        if(stockInfoDTO.getVolume() < 1000 || (stockInfoDTO.getClose() - stockInfoDTO.getPreviousClose()) / stockInfoDTO.getPreviousClose() > 0.06)
+        if(stockInfoDTO.getOpen() < stockInfoDTO.getClose())
+            return false;
+
+        if(stockInfoDTO.getVolume() < 3000 || (stockInfoDTO.getClose() - stockInfoDTO.getPreviousClose()) / stockInfoDTO.getPreviousClose() > 0.06)
             return false;
         var lastDayDataList = stockDayInfoService.getBeforeData(stockInfoDTO.getStockCode(),
                 stockInfoDTO.getDataDate(), 5
@@ -106,8 +109,11 @@ public class CalculateSpecialTask implements Runnable {
 
         var avg = lastDayDataList.stream().mapToInt(StockInfoDTO::getVolume).average().orElse(10000);
 
-        if (stockInfoDTO.getVolume()/avg > 3.5 && lastDayDataList.get(0).getVolume() / avg < 1.5)
-            return true;
+        if (stockInfoDTO.getVolume()/avg > 3.5 && lastDayDataList.get(0).getVolume() / avg < 1.5) {
+            var priceDeal = stockInfoService.getPriceDeal(stockInfoDTO.getStockCode(), true);
+            if(priceDeal == null || priceDeal.getDealOnAskPrice().doubleValue() / priceDeal.getDealOnBidPrice().doubleValue() > 1.1)
+                return true;
+        }
 
         return false;
 

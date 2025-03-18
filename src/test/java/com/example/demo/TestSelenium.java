@@ -5,19 +5,22 @@ import com.example.demo.entity.dto.StockInfoDTO;
 import com.example.demo.entity.dto.StockSingleInfoDTO;
 import com.example.demo.entity.dto.WatchStockDTO;
 import com.example.demo.respository.StockDayInfoRepository;
+import com.example.demo.service.db.StockDayInfoService;
+import com.example.demo.service.db.WatchStockService;
 import com.example.demo.service.stock.LineNotifyService;
 import com.example.demo.service.stock.StockCacheService;
-import com.example.demo.service.db.StockDayInfoService;
 import com.example.demo.service.stock.StockInfoService;
-import com.example.demo.service.db.WatchStockService;
 import com.example.demo.service.task.CalculateRSITask;
 import com.example.demo.service.task.CalculateSpecialTask;
+import com.example.demo.service.task.CalculateStockTask;
 import com.example.demo.service.task.CalculateWantgooDataTask;
-import com.example.demo.service.task.CalculateStockCloseTask;
 import com.example.demo.service.task.StockInfoAPITask;
 import com.example.demo.utils.JsonUtil;
 import com.example.demo.utils.StockUtils;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -133,6 +136,14 @@ public class TestSelenium {
         stockInfoAPITask.run();
     }
 
+    @Test
+    public void realTime() {
+        var calculateStockTask = beanFactory.getBean(
+                CalculateStockTask.class, stockDayInfoService, watchStockService, lineNotifyService,
+                stockCacheService, stockInfoService
+        );
+        calculateStockTask.run();
+    }
 
     @Test
     public void runDali() {
@@ -431,5 +442,36 @@ public class TestSelenium {
                 CalculateSpecialTask.class, stockDayInfoService, lineNotifyService, stockInfoService
         );
         System.out.println(calculateSpecialTask.matchSpecialLogic(stockInfoDTO));
+    }
+
+    @Test
+    public void runPriceDeal(){
+        var data = stockInfoService.getPriceDeal("2332", false);
+
+        System.out.println(data);
+    }
+
+    @Test
+    public void runTimeStamp(){
+        // 定義每天的時間，這裡是下午1:30
+        int hour = 13;
+        int minute = 30;
+
+        // 獲取當前日期
+        LocalDateTime now = LocalDateTime.now();
+        // 設定當前日期的時間為下午1:30
+        LocalDateTime targetTime = now.withHour(hour).withMinute(minute).withSecond(0).withNano(0);
+
+        // 獲取當前時區
+        ZoneId zoneId = ZoneId.systemDefault();
+        ZonedDateTime zonedDateTime = targetTime.atZone(zoneId);
+
+        // 轉換為Instant
+        Instant instant = zonedDateTime.toInstant();
+
+        // 獲取timestamp
+        long timestamp = instant.toEpochMilli();
+
+        System.out.println("Timestamp for today's 1:30 PM: " + timestamp);
     }
 }
