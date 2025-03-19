@@ -60,7 +60,7 @@ spring:
                 username: guest
                 password: guest
       bindings:
-        demo-out-0:
+        msg-out-0:
           content-type: application/json
           destination: stream-test-demo
           group: test-group
@@ -105,7 +105,7 @@ spring:
     url: jdbc:mysql://demo-mysql:3306/mydb?useUnicode=true&characterEncoding=utf-8&useSSL=false
     username: root
     password: Java1234!
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: com.mysql.jdbc.Driver
     hikari:
       connection-timeout: 5000
       maximum-pool-size: 10
