@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.1.0'
+	id 'org.springframework.boot' version '3.3.0'
 	id 'io.spring.dependency-management' version '1.1.0'
 }
 
@@ -22,9 +22,8 @@ repositories {
 }
 
 ext {
-	set('springCloudVersion', "2022.0.3")
+	set('springCloudVersion', "2023.0.4")
 }
-
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
@@ -32,32 +31,31 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-//	DB
+//  DB
 	implementation "org.springframework.boot:spring-boot-starter-data-jpa"
-	implementation 'mysql:mysql-connector-java:8.0.33'
+	implementation 'com.mysql:mysql-connector-j:8.0.33'
 	implementation 'org.liquibase:liquibase-core'
-//	Redis
+//  Redis
 	implementation "org.springframework.boot:spring-boot-starter-data-redis"
 	implementation 'org.apache.commons:commons-pool2'
 	implementation 'com.github.ben-manes.caffeine:caffeine'
-//	lombok
-	compileOnly 'org.projectlombok:lombok:1.18.28'
-	annotationProcessor 'org.projectlombok:lombok:1.18.28'
-	testCompileOnly 'org.projectlombok:lombok:1.18.28'
-	testAnnotationProcessor 'org.projectlombok:lombok:1.18.28'
+//  lombok
+	compileOnly 'org.projectlombok:lombok:1.18.30'
+	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+	testCompileOnly 'org.projectlombok:lombok:1.18.30'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
 
 	//    Spring cloud
 	implementation('org.springframework.cloud:spring-cloud-starter-bootstrap')
 	implementation('org.springframework.cloud:spring-cloud-starter-openfeign')
-	implementation("org.springframework.cloud:spring-cloud-stream")
+	implementation 'org.springframework.cloud:spring-cloud-stream'
 	implementation('org.springframework.cloud:spring-cloud-starter-stream-rabbit')
 	testImplementation 'junit:junit:4.13.2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 	//swagger ui
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
-	implementation 'org.springdoc:springdoc-openapi-starter-common:2.1.0'
-
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-common:2.3.0'
 
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 }
@@ -71,4 +69,3 @@ dependencyManagement {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 	}
 }
-

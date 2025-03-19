@@ -20,16 +20,16 @@ public class StreamProvider {
     }
 
     @GetMapping("/send")
-    public String send(){
-        User user=new User("stream test", 123, new Date(), BigDecimal.valueOf(123), Long.valueOf(12323));        streamBridge.send("demo-out-0", JsonUtil.objectToJson(user));
-        streamBridge.send("demo-out-0", user);
+    public String send() {
+        User user = new User("stream test", 123, new Date(), BigDecimal.valueOf(123), Long.valueOf(12323));
+        streamBridge.send("msg-out-0", user); // 直接发送 User 对象
         return "success";
     }
 
     @GetMapping("/group")
-    public String send_group(){
-        User user=new User("stream test", 123, new Date(), BigDecimal.valueOf(123), Long.valueOf(12323));        streamBridge.send("demo-out-0", JsonUtil.objectToJson(user));
-        streamBridge.send("demo2-out-0", user);
+    public String send_group() {
+        User user = new User("stream test", 123, new Date(), BigDecimal.valueOf(123), Long.valueOf(12323));
+        streamBridge.send("demo2-out-1", user); // 修改为 demo2-out-1
         return "success";
     }
 

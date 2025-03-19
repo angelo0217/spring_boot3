@@ -42,7 +42,7 @@ spring:
                 username: guest
                 password: guest
       bindings:
-        demo-out-0:
+        msg-out-0:
           content-type: application/json
           destination: stream-test-demo
           group: test-group
